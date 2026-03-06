@@ -1,0 +1,22 @@
+# Credentials — never commit
+static/config.js
+
+# Raw shapefile data — already uploaded to Supabase
+data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Node (if ever used)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
