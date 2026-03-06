@@ -68,7 +68,7 @@ class LagoonMapApplication {
             const map = this.mapManager.getMap();
 
             // Marker cluster layer
-            this.markerManager = new MarkerManager(map, this.eventBus, this.stateManager);
+            this.markerManager = new MarkerManager(map, this.eventBus, this.stateManager, this.dataManager);
             this.markerManager.init();
 
             // Polygon layer (zoom-triggered)
@@ -166,10 +166,20 @@ class LagoonMapApplication {
         });
 
         // Marker / polygon click → detail modal
-        this.eventBus.on('marker:clicked', async ({ lagoonId }) => {
+        this.eventBus.on('marker:clicked', async ({ lagoonId, previewGeojson = null, centroidLat = null, centroidLng = null }) => {
             try {
-                const lagoon = await this.dataManager.fetchLagoonDetails(lagoonId);
-                this.modalManager.showLagoonDetails(lagoon);
+                const [lagoon, geometry] = await Promise.all([
+                    this.dataManager.fetchLagoonDetails(lagoonId),
+                    this.dataManager.fetchLagoonGeometryById(lagoonId)
+                ]);
+
+                const fallbackPreview = {
+                    geojson: previewGeojson || lagoon?.geojson || null,
+                    centroid_lat: centroidLat ?? lagoon?.centroid_lat ?? null,
+                    centroid_lng: centroidLng ?? lagoon?.centroid_lng ?? null
+                };
+
+                this.modalManager.showLagoonDetails(lagoon, geometry || fallbackPreview);
             } catch (err) {
                 console.error('Error loading lagoon details:', err);
                 this.uiController.showError('Failed to load lagoon details.');

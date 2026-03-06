@@ -3,6 +3,9 @@
  * Shows polygon outlines when map zoom >= POLYGON_ZOOM_THRESHOLD.
  */
 
+import LagoonPreviewMap from './LagoonPreviewMap.js';
+import { escapeHtml } from '../utils/helpers.js';
+
 const POLYGON_ZOOM_THRESHOLD = 11;
 
 class PolygonManager {
@@ -15,6 +18,7 @@ class PolygonManager {
         this.polygonsVisible = false;
         this.cachedData = null;
         this.activeFilters = {};
+        this.previewMap = new LagoonPreviewMap();
     }
 
     init() {
@@ -89,24 +93,68 @@ class PolygonManager {
 
     _bindPolygonInteractions(feature, layer) {
         const p = feature.properties;
-        const area  = p.area_km2 != null ? `${parseFloat(p.area_km2).toFixed(2)} km²` : '-';
-        const rcp26 = p.rcp2_6_inundated ? p.rcp2_6_inundated.toUpperCase() : '-';
-        const rcp85 = p.rcp8_5_inundated ? p.rcp8_5_inundated.toUpperCase() : '-';
-
-        layer.bindTooltip(`
-            <div class="marker-tooltip">
-                <div class="tooltip-name">${p.name_en || 'Unnamed'}</div>
-                <div class="tooltip-row"><span class="tooltip-label">Location:</span> ${p.location_en || '-'}</div>
-                <div class="tooltip-row"><span class="tooltip-label">Island:</span> ${p.island_en || '-'}</div>
-                <div class="tooltip-row"><span class="tooltip-label">Area:</span> ${area}</div>
-                <div class="tooltip-row"><span class="tooltip-label">RCP 2.6:</span> ${rcp26}</div>
-                <div class="tooltip-row"><span class="tooltip-label">RCP 8.5:</span> ${rcp85}</div>
-            </div>
-        `, { className: 'custom-tooltip', sticky: true });
+        layer.bindTooltip(this.buildTooltipHTML(p), { className: 'custom-tooltip', sticky: true });
 
         layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.55 }));
         layer.on('mouseout',  () => this.polygonLayer?.resetStyle(layer));
-        layer.on('click',     () => this.eventBus.emit('marker:clicked', { lagoonId: p.id }));
+
+        layer.on('tooltipopen', e => {
+            const center = layer.getBounds()?.getCenter?.() || null;
+            const previewData = {
+                id: p.id,
+                geojson: feature.geometry,
+                centroid_lat: center?.lat ?? null,
+                centroid_lng: center?.lng ?? null
+            };
+            this.renderTooltipPreview(e.tooltip, previewData);
+        });
+
+        layer.on('tooltipclose', e => this.destroyTooltipPreview(e.tooltip));
+
+        layer.on('click', () => {
+            const center = layer.getBounds()?.getCenter?.() || null;
+            this.eventBus.emit('marker:clicked', {
+                lagoonId: p.id,
+                previewGeojson: feature.geometry,
+                centroidLat: center?.lat ?? null,
+                centroidLng: center?.lng ?? null
+            });
+        });
+    }
+
+    buildTooltipHTML(properties) {
+        const area  = properties.area_km2 != null ? `${parseFloat(properties.area_km2).toFixed(2)} km²` : '-';
+        const rcp26 = properties.rcp2_6_inundated ? properties.rcp2_6_inundated.toUpperCase() : '-';
+        const rcp85 = properties.rcp8_5_inundated ? properties.rcp8_5_inundated.toUpperCase() : '-';
+
+        return `
+            <div class="lagoon-hover-card">
+                <div class="lagoon-hover-preview">
+                    <div class="lagoon-preview-map" data-tooltip-preview-map></div>
+                </div>
+                <div class="lagoon-hover-body">
+                    <div class="lagoon-hover-name">${escapeHtml(properties.name_en || 'Unnamed')}</div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Location</span><span class="lagoon-hover-value">${escapeHtml(properties.location_en || '-')}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Island</span><span class="lagoon-hover-value">${escapeHtml(properties.island_en || '-')}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Area</span><span class="lagoon-hover-value">${escapeHtml(area)}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">RCP 2.6</span><span class="lagoon-hover-value">${escapeHtml(rcp26)}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">RCP 8.5</span><span class="lagoon-hover-value">${escapeHtml(rcp85)}</span></div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderTooltipPreview(tooltip, previewData) {
+        const tooltipEl = tooltip?.getElement?.();
+        const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
+        if (!previewContainer) return;
+        this.previewMap.render(previewContainer, previewData);
+    }
+
+    destroyTooltipPreview(tooltip) {
+        const tooltipEl = tooltip?.getElement?.();
+        const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
+        if (previewContainer) this.previewMap.destroy(previewContainer);
     }
 
     isVisible() { return this.polygonsVisible; }

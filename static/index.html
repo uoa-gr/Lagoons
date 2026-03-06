@@ -148,6 +148,20 @@
                         </div>
 
                         <div id="filter-controls">
+                            <!-- Name Filter -->
+                            <div class="filter-group">
+                                <label>Name:</label>
+                                <button class="filter-selector" data-filter="name" id="name-filter-btn">
+                                    <span class="filter-selector-value">All Names</span>
+                                    <span class="filter-selector-badge" id="name-filter-badge"></span>
+                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                                <input type="hidden" id="name-filter" name="name" value="">
+                            </div>
+
                             <!-- Location Filter -->
                             <div class="filter-group">
                                 <label>Location:</label>

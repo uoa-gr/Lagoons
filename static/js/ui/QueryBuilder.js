@@ -163,6 +163,7 @@ class QueryBuilder {
 
     getFieldValues(fieldName) {
         const map = {
+            name_en:          'names',
             location_en:      'locations',
             island_en:        'islands',
             rcp2_6_inundated: 'rcp2_6_values',

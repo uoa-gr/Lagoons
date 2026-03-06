@@ -65,6 +65,7 @@ CREATE INDEX IF NOT EXISTS lagoons_geom_idx        ON public.lagoons USING GIST 
 -- Regular indexes for common filters
 CREATE INDEX IF NOT EXISTS lagoons_location_idx    ON public.lagoons (location_en);
 CREATE INDEX IF NOT EXISTS lagoons_island_idx      ON public.lagoons (island_en);
+CREATE INDEX IF NOT EXISTS lagoons_name_idx        ON public.lagoons (name_en);
 CREATE INDEX IF NOT EXISTS lagoons_rcp26_idx       ON public.lagoons (rcp2_6_inundated);
 CREATE INDEX IF NOT EXISTS lagoons_rcp85_idx       ON public.lagoons (rcp8_5_inundated);
 
@@ -97,6 +98,7 @@ $$;
 -- 5. RPC: api_lagoons_markers
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_markers(
+    p_name_en          TEXT    DEFAULT NULL,
     p_location_en      TEXT    DEFAULT NULL,
     p_island_en        TEXT    DEFAULT NULL,
     p_rcp2_6_inundated TEXT    DEFAULT NULL,
@@ -126,6 +128,8 @@ AS $$
         l.centroid_lat, l.centroid_lng
     FROM public.lagoons l
     WHERE
+        (p_name_en          IS NULL OR l.name_en          = p_name_en)
+        AND
         (p_location_en      IS NULL OR l.location_en      = p_location_en)
         AND (p_island_en    IS NULL OR l.island_en        = p_island_en)
         AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
@@ -138,6 +142,7 @@ $$;
 -- 6. RPC: api_lagoons_polygons
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_polygons(
+    p_name_en          TEXT    DEFAULT NULL,
     p_location_en      TEXT    DEFAULT NULL,
     p_island_en        TEXT    DEFAULT NULL,
     p_rcp2_6_inundated TEXT    DEFAULT NULL,
@@ -162,6 +167,7 @@ AS $$
     FROM public.lagoons l
     WHERE
         l.geom IS NOT NULL
+        AND (p_name_en          IS NULL OR l.name_en          = p_name_en)
         AND (p_location_en      IS NULL OR l.location_en      = p_location_en)
         AND (p_island_en        IS NULL OR l.island_en        = p_island_en)
         AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
@@ -195,7 +201,8 @@ RETURNS TABLE (
     rcp8_5_vec_inundated TEXT,
     data_quality         TEXT,
     centroid_lat         DOUBLE PRECISION,
-    centroid_lng         DOUBLE PRECISION
+    centroid_lng         DOUBLE PRECISION,
+    geojson              TEXT
 )
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
@@ -205,16 +212,64 @@ AS $$
         rcp2_6_slr, rcp8_5_slr, rcp2_6_vec_slr, rcp8_5_vec_slr,
         rcp2_6_inundated, rcp8_5_inundated,
         rcp2_6_vec_inundated, rcp8_5_vec_inundated,
-        data_quality, centroid_lat, centroid_lng
+        data_quality, centroid_lat, centroid_lng,
+        ST_AsGeoJSON(geom)::TEXT AS geojson
     FROM public.lagoons
     WHERE id = p_id;
 $$;
 
 
 -- ---------------------------------------------------------------------------
--- 8. RPC: api_lagoons_filter_locations
+-- 8. RPC: api_lagoons_preview_geometry
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.api_lagoons_preview_geometry(p_id INTEGER)
+RETURNS TABLE (
+    id           INTEGER,
+    centroid_lat DOUBLE PRECISION,
+    centroid_lng DOUBLE PRECISION,
+    geojson      TEXT
+)
+LANGUAGE sql STABLE SECURITY DEFINER
+AS $$
+    SELECT
+        l.id,
+        l.centroid_lat,
+        l.centroid_lng,
+        ST_AsGeoJSON(l.geom)::TEXT AS geojson
+    FROM public.lagoons l
+    WHERE l.id = p_id;
+$$;
+
+
+-- ---------------------------------------------------------------------------
+-- 9. RPC: api_lagoons_filter_names
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.api_lagoons_filter_names(
+    p_location_en      TEXT DEFAULT NULL,
+    p_island_en        TEXT DEFAULT NULL,
+    p_rcp2_6_inundated TEXT DEFAULT NULL,
+    p_rcp8_5_inundated TEXT DEFAULT NULL
+)
+RETURNS TABLE (name_en TEXT)
+LANGUAGE sql STABLE SECURITY DEFINER
+AS $$
+    SELECT DISTINCT l.name_en
+    FROM public.lagoons l
+    WHERE
+        l.name_en IS NOT NULL
+        AND (p_location_en      IS NULL OR l.location_en      = p_location_en)
+        AND (p_island_en        IS NULL OR l.island_en        = p_island_en)
+        AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
+        AND (p_rcp8_5_inundated IS NULL OR l.rcp8_5_inundated = p_rcp8_5_inundated)
+    ORDER BY l.name_en;
+$$;
+
+
+-- ---------------------------------------------------------------------------
+-- 10. RPC: api_lagoons_filter_locations
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_filter_locations(
+    p_name_en          TEXT DEFAULT NULL,
     p_island_en        TEXT DEFAULT NULL,
     p_rcp2_6_inundated TEXT DEFAULT NULL,
     p_rcp8_5_inundated TEXT DEFAULT NULL
@@ -226,6 +281,7 @@ AS $$
     FROM public.lagoons l
     WHERE
         l.location_en IS NOT NULL
+        AND (p_name_en          IS NULL OR l.name_en          = p_name_en)
         AND (p_island_en        IS NULL OR l.island_en        = p_island_en)
         AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
         AND (p_rcp8_5_inundated IS NULL OR l.rcp8_5_inundated = p_rcp8_5_inundated)
@@ -234,9 +290,10 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- 9. RPC: api_lagoons_filter_islands
+-- 11. RPC: api_lagoons_filter_islands
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_filter_islands(
+    p_name_en          TEXT DEFAULT NULL,
     p_location_en      TEXT DEFAULT NULL,
     p_rcp2_6_inundated TEXT DEFAULT NULL,
     p_rcp8_5_inundated TEXT DEFAULT NULL
@@ -248,6 +305,7 @@ AS $$
     FROM public.lagoons l
     WHERE
         l.island_en IS NOT NULL
+        AND (p_name_en          IS NULL OR l.name_en          = p_name_en)
         AND (p_location_en      IS NULL OR l.location_en      = p_location_en)
         AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
         AND (p_rcp8_5_inundated IS NULL OR l.rcp8_5_inundated = p_rcp8_5_inundated)
@@ -256,9 +314,10 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- 10. RPC: api_lagoons_filter_rcp26
+-- 12. RPC: api_lagoons_filter_rcp26
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_filter_rcp26(
+    p_name_en          TEXT DEFAULT NULL,
     p_location_en      TEXT DEFAULT NULL,
     p_island_en        TEXT DEFAULT NULL,
     p_rcp8_5_inundated TEXT DEFAULT NULL
@@ -270,6 +329,7 @@ AS $$
     FROM public.lagoons l
     WHERE
         l.rcp2_6_inundated IS NOT NULL
+        AND (p_name_en          IS NULL OR l.name_en          = p_name_en)
         AND (p_location_en      IS NULL OR l.location_en      = p_location_en)
         AND (p_island_en        IS NULL OR l.island_en        = p_island_en)
         AND (p_rcp8_5_inundated IS NULL OR l.rcp8_5_inundated = p_rcp8_5_inundated)
@@ -278,9 +338,10 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- 11. RPC: api_lagoons_filter_rcp85
+-- 13. RPC: api_lagoons_filter_rcp85
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.api_lagoons_filter_rcp85(
+    p_name_en          TEXT DEFAULT NULL,
     p_location_en      TEXT DEFAULT NULL,
     p_island_en        TEXT DEFAULT NULL,
     p_rcp2_6_inundated TEXT DEFAULT NULL
@@ -292,6 +353,7 @@ AS $$
     FROM public.lagoons l
     WHERE
         l.rcp8_5_inundated IS NOT NULL
+        AND (p_name_en          IS NULL OR l.name_en          = p_name_en)
         AND (p_location_en      IS NULL OR l.location_en      = p_location_en)
         AND (p_island_en        IS NULL OR l.island_en        = p_island_en)
         AND (p_rcp2_6_inundated IS NULL OR l.rcp2_6_inundated = p_rcp2_6_inundated)
@@ -300,13 +362,15 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- 12. GRANT execute to anon role on all API functions
+-- 14. GRANT execute to anon role on all API functions
 -- ---------------------------------------------------------------------------
 GRANT EXECUTE ON FUNCTION public.api_lagoons_count()                                       TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_markers(TEXT, TEXT, TEXT, TEXT)               TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_polygons(TEXT, TEXT, TEXT, TEXT)              TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_markers(TEXT, TEXT, TEXT, TEXT, TEXT)         TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_polygons(TEXT, TEXT, TEXT, TEXT, TEXT)        TO anon;
 GRANT EXECUTE ON FUNCTION public.api_lagoons_details(INTEGER)                              TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_locations(TEXT, TEXT, TEXT)            TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_islands(TEXT, TEXT, TEXT)              TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_rcp26(TEXT, TEXT, TEXT)                TO anon;
-GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_rcp85(TEXT, TEXT, TEXT)                TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_preview_geometry(INTEGER)                      TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_names(TEXT, TEXT, TEXT, TEXT)          TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_locations(TEXT, TEXT, TEXT, TEXT)      TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_islands(TEXT, TEXT, TEXT, TEXT)        TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_rcp26(TEXT, TEXT, TEXT, TEXT)          TO anon;
+GRANT EXECUTE ON FUNCTION public.api_lagoons_filter_rcp85(TEXT, TEXT, TEXT, TEXT)          TO anon;

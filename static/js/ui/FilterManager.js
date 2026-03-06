@@ -1,6 +1,6 @@
 /**
  * FilterManager - Modal-based filter UI for Greek Lagoons
- * Filters: Location / Island / RCP 2.6 Inundated / RCP 8.5 Inundated
+ * Filters: Name / Location / Island / RCP 2.6 Inundated / RCP 8.5 Inundated
  */
 
 import { escapeHtml, debounce } from '../utils/helpers.js';
@@ -21,6 +21,12 @@ class FilterManager {
         this.activeFilterKey = null;
 
         this.filterConfig = {
+            name: {
+                label: 'Name',
+                optionsKey: 'names',
+                defaultText: 'All Names',
+                searchable: true
+            },
             location: {
                 label: 'Location',
                 optionsKey: 'locations',
@@ -71,6 +77,9 @@ class FilterManager {
 
     cacheElements() {
         this.filterElements = {
+            name: document.getElementById('name-filter'),
+            nameBtn: document.getElementById('name-filter-btn'),
+            nameBadge: document.getElementById('name-filter-badge'),
             location: document.getElementById('location-filter'),
             locationBtn: document.getElementById('location-filter-btn'),
             locationBadge: document.getElementById('location-filter-badge'),
@@ -396,6 +405,7 @@ class FilterManager {
 
     getActiveFilters() {
         return {
+            name: this.filterElements.name?.value || null,
             location: this.filterElements.location?.value || null,
             island: this.filterElements.island?.value || null,
             rcp2_6_inundated: this.filterElements.rcp2_6_inundated?.value || null,
@@ -430,6 +440,7 @@ class FilterManager {
         activeFiltersList.textContent = '';
 
         const filterLabels = {
+            name: 'Name',
             location: 'Location',
             island: 'Island',
             rcp2_6_inundated: 'RCP 2.6',
@@ -486,6 +497,7 @@ class FilterManager {
                 toggleBtn.textContent = `Filters (${count})`;
             } else {
                 const filterNames = [];
+                if (filters.name) filterNames.push('Name');
                 if (filters.location) filterNames.push('Location');
                 if (filters.island) filterNames.push('Island');
                 if (filters.rcp2_6_inundated) filterNames.push('RCP 2.6');

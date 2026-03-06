@@ -2,6 +2,7 @@
  * ModalManager - Modal lifecycle for Greek Lagoons
  */
 
+import LagoonPreviewMap from '../map/LagoonPreviewMap.js';
 import { escapeHtml } from '../utils/helpers.js';
 
 class ModalManager {
@@ -11,6 +12,8 @@ class ModalManager {
 
         this.modals      = new Map();
         this.activeModal = null;
+        this.lagoonPreviewMap = new LagoonPreviewMap();
+        this.lagoonPreviewContainer = null;
 
         this.MODAL_IDS = {
             LAGOON_DETAILS:     'lagoon-modal',
@@ -93,6 +96,10 @@ class ModalManager {
         const data = this.modals.get(id);
         if (!data) return;
 
+        if (id === this.MODAL_IDS.LAGOON_DETAILS) {
+            this.destroyLagoonPreview();
+        }
+
         data.element.classList.remove('active');
         document.body.classList.remove('modal-open');
         if (this.activeModal === id) this.activeModal = null;
@@ -104,21 +111,17 @@ class ModalManager {
         this.activeModal = null;
     }
 
-    showLagoonDetails(lagoon) {
+    showLagoonDetails(lagoon, previewData = null) {
         const container = document.getElementById('lagoon-details');
         if (!container) return;
 
         container.innerHTML = this.generateLagoonDetailsHTML(lagoon);
         this.openModal(this.MODAL_IDS.LAGOON_DETAILS);
+        this.renderLagoonPreview(previewData || lagoon);
     }
 
     generateLagoonDetailsHTML(lagoon) {
         if (!lagoon) return '<p>No data available.</p>';
-
-        const fmt = (v, unit = '') => {
-            if (v == null || v === '') return '-';
-            return unit ? `${parseFloat(v).toFixed(2)} ${unit}` : escapeHtml(String(v));
-        };
 
         const fields = [
             { label: 'Name (EN)',          value: lagoon.name_en,          highlight: true },
@@ -158,7 +161,31 @@ class ModalManager {
                 </div>`;
         });
 
-        return html;
+        return `
+            <section class="lagoon-modal-preview-panel">
+                <div id="lagoon-modal-preview-map" class="lagoon-preview-map lagoon-modal-preview-map"></div>
+            </section>
+            <section class="lagoon-modal-details-grid">
+                ${html}
+            </section>
+        `;
+    }
+
+    renderLagoonPreview(lagoon) {
+        this.destroyLagoonPreview();
+
+        requestAnimationFrame(() => {
+            const previewContainer = document.getElementById('lagoon-modal-preview-map');
+            if (!previewContainer) return;
+            this.lagoonPreviewContainer = previewContainer;
+            this.lagoonPreviewMap.render(previewContainer, lagoon || {});
+        });
+    }
+
+    destroyLagoonPreview() {
+        if (!this.lagoonPreviewContainer) return;
+        this.lagoonPreviewMap.destroy(this.lagoonPreviewContainer);
+        this.lagoonPreviewContainer = null;
     }
 
     isModalOpen(id = null) {

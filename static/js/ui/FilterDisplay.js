@@ -16,6 +16,7 @@ class FilterDisplay {
         };
 
         this.filterLabels = {
+            name:             'Name',
             location:         'Location',
             island:           'Island',
             rcp2_6_inundated: 'RCP 2.6',

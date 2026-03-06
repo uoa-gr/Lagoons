@@ -4485,3 +4485,104 @@ body.modal-open {
         margin-top: 0.5rem !important;
     }
 }
+
+/* ===== LAGOON HOVER CARD ===== */
+.leaflet-tooltip.custom-tooltip {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.leaflet-tooltip.custom-tooltip .leaflet-tooltip-content {
+    margin: 0;
+    padding: 0;
+}
+
+.lagoon-hover-card {
+    width: min(310px, calc(100vw - 40px));
+    background: #ffffff;
+    border: 1px solid #0f172a;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
+}
+
+.lagoon-hover-preview {
+    width: 100%;
+    height: 138px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #e2e8f0;
+}
+
+.lagoon-preview-map {
+    width: 100%;
+    height: 100%;
+    background: #e2e8f0;
+}
+
+.lagoon-hover-body {
+    padding: 0.7rem 0.85rem 0.8rem;
+}
+
+.lagoon-hover-name {
+    margin-bottom: 0.45rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #0f172a;
+}
+
+.lagoon-hover-row {
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    column-gap: 0.55rem;
+    align-items: baseline;
+    padding: 0.12rem 0;
+}
+
+.lagoon-hover-label {
+    font-size: 0.67rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #475569;
+}
+
+.lagoon-hover-value {
+    font-size: 0.73rem;
+    color: #0f172a;
+    text-align: right;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* ===== LAGOON MODAL PREVIEW ===== */
+.lagoon-modal-preview-panel {
+    margin-bottom: 1.1rem;
+}
+
+.lagoon-modal-preview-map {
+    width: 100%;
+    height: 230px;
+    border: 1px solid #0f172a;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.lagoon-modal-details-grid .detail-item:first-child {
+    border-top: 1px solid #f0f0f0;
+}
+
+@media (max-width: 768px) {
+    .lagoon-hover-card {
+        width: min(260px, calc(100vw - 36px));
+    }
+
+    .lagoon-hover-preview {
+        height: 122px;
+    }
+
+    .lagoon-modal-preview-map {
+        height: 185px;
+    }
+}
