@@ -185,8 +185,9 @@ class DataManager {
                 nameResult.error || locResult.error || islResult.error || rcp26Result.error || rcp85Result.error;
             if (rpcError) throw rpcError;
 
+            const nameData = await this.fetchLagoonData(activeFilters);
             options = {
-                names:         (nameResult.data  || []).map(r => r.name_en),
+                names:         this.buildNameOptions(nameData),
                 locations:     (locResult.data   || []).map(r => r.location_en),
                 islands:       (islResult.data   || []).map(r => r.island_en),
                 rcp2_6_values: (rcp26Result.data || []).map(r => r.rcp2_6_inundated),
@@ -200,7 +201,7 @@ class DataManager {
             const data = await this.fetchLagoonData(activeFilters);
             const toUnique = arr => [...new Set(arr.filter(Boolean))].sort();
             options = {
-                names:         toUnique(data.map(r => r.name_en)),
+                names:         this.buildNameOptions(data),
                 locations:     toUnique(data.map(r => r.location_en)),
                 islands:       toUnique(data.map(r => r.island_en)),
                 rcp2_6_values: toUnique(data.map(r => r.rcp2_6_inundated)),
@@ -223,7 +224,7 @@ class DataManager {
     emitFilterOptionsFromData(data) {
         const toUnique = arr => [...new Set(arr.filter(Boolean))].sort();
         const options = {
-            names:         toUnique(data.map(r => r.name_en)),
+            names:         this.buildNameOptions(data),
             locations:     toUnique(data.map(r => r.location_en)),
             islands:       toUnique(data.map(r => r.island_en)),
             rcp2_6_values: toUnique(data.map(r => r.rcp2_6_inundated)),
@@ -234,6 +235,30 @@ class DataManager {
         }
         this.stateManager.set('filterOptions', options);
         this.eventBus.emit('filterOptions:loaded', { options, allOptions: this.allOptions });
+    }
+
+    buildNameOptions(data = []) {
+        const seen = new Set();
+        const list = [];
+
+        data.forEach(row => {
+            const name = row?.name_en ? String(row.name_en).trim() : '';
+            if (!name) return;
+
+            const location = row?.location_en ? String(row.location_en).trim() : '';
+            const key = `${name}|${location}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+
+            list.push({
+                value: name,
+                location,
+                label: location ? `${name} (${location})` : name
+            });
+        });
+
+        list.sort((a, b) => a.label.localeCompare(b.label));
+        return list;
     }
 }
 

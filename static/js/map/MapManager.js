@@ -10,6 +10,7 @@ class MapManager {
         this.stateManager = stateManager;
         this.map = null;
         this.basemaps = {};
+        this.currentBasemap = null;
         this.measurementTool = null;
     }
 
@@ -40,12 +41,12 @@ class MapManager {
             'CartoDB Positron': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 }),
             'CartoDB Dark':     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  { attribution: '© CartoDB', maxZoom: 19 })
         };
-        this.basemaps['OpenStreetMap'].addTo(this.map);
+        this.basemaps['ESRI Satellite'].addTo(this.map);
+        this.currentBasemap = 'ESRI Satellite';
     }
 
     _initControls() {
-        const isMobile = window.innerWidth <= 768;
-        L.control.layers(this.basemaps, {}, { position: isMobile ? 'bottomright' : 'topright', collapsed: true }).addTo(this.map);
+        this._addBasemapPicker();
 
         const NorthArrow = L.Control.extend({
             options: { position: 'bottomleft' },
@@ -64,6 +65,86 @@ class MapManager {
         if (typeof MeasurementTool !== 'undefined') {
             this.measurementTool = new MeasurementTool(this.map);
         }
+    }
+
+    _addBasemapPicker() {
+        const basemapNames = Object.keys(this.basemaps);
+        if (!basemapNames.length) return;
+
+        const BasemapPickerControl = L.Control.extend({
+            options: { position: 'topleft' },
+            onAdd: () => {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control basemap-picker');
+                const btn = L.DomUtil.create('button', 'basemap-picker-btn', container);
+                btn.type = 'button';
+                btn.setAttribute('aria-label', 'Select basemap');
+                btn.title = 'Select basemap';
+                btn.innerHTML = `
+                    <svg class="basemap-picker-icon" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <rect x="3" y="4" width="18" height="16" rx="1.5"/>
+                        <polyline points="3 15 8 10 13 14 16 11 21 15"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                    </svg>
+                `;
+
+                const panel = L.DomUtil.create('div', 'basemap-picker-panel', container);
+                panel.setAttribute('role', 'menu');
+                panel.style.display = 'none';
+
+                const closePanel = () => {
+                    panel.style.display = 'none';
+                    container.classList.remove('basemap-picker-open');
+                };
+
+                const openPanel = () => {
+                    panel.style.display = 'block';
+                    container.classList.add('basemap-picker-open');
+                };
+
+                const togglePanel = e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (panel.style.display === 'none') openPanel();
+                    else closePanel();
+                };
+
+                basemapNames.forEach(name => {
+                    const item = L.DomUtil.create('button', 'basemap-picker-item', panel);
+                    item.type = 'button';
+                    item.textContent = name;
+                    item.addEventListener('click', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.switchBasemap(name);
+                        closePanel();
+                    });
+                });
+
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                btn.addEventListener('click', togglePanel);
+
+                document.addEventListener('click', e => {
+                    if (!container.contains(e.target)) closePanel();
+                });
+
+                return container;
+            }
+        });
+
+        this.map.addControl(new BasemapPickerControl());
+    }
+
+    switchBasemap(name) {
+        if (!this.basemaps[name]) return;
+        if (this.currentBasemap && this.basemaps[this.currentBasemap]) {
+            this.map.removeLayer(this.basemaps[this.currentBasemap]);
+        }
+        this.basemaps[name].addTo(this.map);
+        this.currentBasemap = name;
     }
 
     getMap() { return this.map; }

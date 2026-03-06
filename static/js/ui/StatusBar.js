@@ -1,6 +1,6 @@
 /**
- * StatusBar - Bottom status bar for Greek Lagoons
- * Shows total / showing counts and connection status.
+ * StatusBar - Floating status/legend bar for Greek Lagoons
+ * Shows scale, legend, totals and map mode at top of map.
  */
 
 import { formatNumber } from '../utils/helpers.js';
@@ -11,12 +11,15 @@ class StatusBar {
         this.stateManager = stateManager;
         this.container    = null;
         this.scaleControl = null;
+        this.POLYGON_ZOOM_THRESHOLD = 11;
 
         this.elements = {
             total:         null,
             filtered:      null,
             connectionDot: null,
-            scaleContainer: null
+            scaleContainer: null,
+            zoom:          null,
+            polygonMode:   null
         };
 
         this.isOnline    = navigator.onLine;
@@ -40,8 +43,24 @@ class StatusBar {
         this.container = document.createElement('div');
         this.container.className = 'map-status-bar';
         this.container.innerHTML = `
-            <div class="status-bar-left">
-                <div class="status-scale" id="status-scale"></div>
+            <div class="status-bar-left-col">
+                <div class="status-bar-legend">
+                    <div class="legend-row">
+                        <span class="legend-dot high"></span>
+                        <span class="legend-text">RCP 2.6 + 8.5 inundated</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot medium"></span>
+                        <span class="legend-text">RCP 8.5 only inundated</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot low"></span>
+                        <span class="legend-text">No projected inundation</span>
+                    </div>
+                </div>
+                <div class="status-bar-left">
+                    <div class="status-scale" id="status-scale"></div>
+                </div>
             </div>
             <div class="status-bar-right">
                 <div class="status-item">
@@ -51,6 +70,14 @@ class StatusBar {
                 <div class="status-item">
                     <span class="status-label">Showing</span>
                     <span class="status-value" id="status-filtered">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Zoom</span>
+                    <span class="status-value" id="status-zoom">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Polygons</span>
+                    <span class="status-value" id="status-polygons">OFF</span>
                 </div>
                 <div class="status-item status-connection">
                     <span class="status-dot online" id="status-conn-dot"></span>
@@ -63,21 +90,71 @@ class StatusBar {
         this.elements.filtered      = this.container.querySelector('#status-filtered');
         this.elements.connectionDot = this.container.querySelector('#status-conn-dot');
         this.elements.scaleContainer = this.container.querySelector('#status-scale');
+        this.elements.zoom          = this.container.querySelector('#status-zoom');
+        this.elements.polygonMode   = this.container.querySelector('#status-polygons');
     }
 
     createScaleBar() {
-        this.scaleControl = L.control.scale({
-            position: 'bottomleft',
-            metric: true,
-            imperial: false,
-            maxWidth: 100
-        });
-        this.scaleControl.addTo(this.map);
+        this.updateCartographicScale();
+        this.map.on('moveend zoomend', () => this.updateCartographicScale());
+        this.updateMapModeStats();
+        this.map.on('zoomend', () => this.updateMapModeStats());
+    }
 
-        const scaleEl = document.querySelector('.leaflet-control-scale');
-        if (scaleEl && this.elements.scaleContainer) {
-            this.elements.scaleContainer.appendChild(scaleEl);
+    niceNum(maxVal) {
+        const pow10 = Math.pow(10, Math.floor(Math.log(maxVal) / Math.LN10));
+        const d = maxVal / pow10;
+        return (d >= 5 ? 5 : d >= 2 ? 2 : 1) * pow10;
+    }
+
+    updateCartographicScale() {
+        const el = this.elements.scaleContainer;
+        if (!el || !this.map) return;
+
+        const size = this.map.getSize();
+        const maxPx = 110;
+        const maxMeters = this.map.distance(
+            this.map.containerPointToLatLng([0, size.y / 2]),
+            this.map.containerPointToLatLng([maxPx, size.y / 2])
+        );
+
+        if (!maxMeters || !isFinite(maxMeters)) return;
+
+        let nice;
+        let unit;
+        let meters;
+        if (maxMeters >= 1000) {
+            nice = this.niceNum(maxMeters / 1000);
+            unit = 'km';
+            meters = nice * 1000;
+        } else {
+            nice = this.niceNum(maxMeters);
+            unit = 'm';
+            meters = nice;
         }
+
+        const px = Math.round(maxPx * meters / maxMeters);
+
+        el.innerHTML = `
+            <div class="carto-scale">
+                <div class="carto-scale-bar" style="width:${px}px">
+                    <span class="carto-seg carto-seg-b"></span>
+                    <span class="carto-seg carto-seg-w"></span>
+                    <span class="carto-seg carto-seg-b"></span>
+                    <span class="carto-seg carto-seg-w"></span>
+                </div>
+                <div class="carto-scale-label">${nice}&nbsp;${unit}</div>
+            </div>
+        `;
+    }
+
+    updateMapModeStats() {
+        if (!this.map) return;
+        const zoom = this.map.getZoom();
+        const polygonsOn = zoom >= this.POLYGON_ZOOM_THRESHOLD;
+
+        if (this.elements.zoom) this.elements.zoom.textContent = formatNumber(zoom);
+        if (this.elements.polygonMode) this.elements.polygonMode.textContent = polygonsOn ? 'ON' : 'OFF';
     }
 
     setupEventListeners() {

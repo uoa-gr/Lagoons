@@ -167,6 +167,37 @@ class FilterManager {
         });
     }
 
+    getOptionValue(option) {
+        if (option && typeof option === 'object') {
+            return option.value ?? option.name_en ?? '';
+        }
+        return option;
+    }
+
+    getOptionLabel(option) {
+        if (option && typeof option === 'object') {
+            if (option.label != null && option.label !== '') {
+                return String(option.label);
+            }
+
+            const value = this.getOptionValue(option);
+            const location = option.location ?? option.location_en ?? '';
+            if (location) return `${value} (${location})`;
+            return String(value);
+        }
+
+        return String(option ?? '');
+    }
+
+    getOptionKey(option) {
+        if (option && typeof option === 'object') {
+            const value = this.getOptionValue(option);
+            const location = option.location ?? option.location_en ?? '';
+            return `${String(value)}|${String(location)}`;
+        }
+        return String(this.getOptionValue(option));
+    }
+
     openFilterModal(filterKey) {
         this.activeFilterKey = filterKey;
         const config = this.filterConfig[filterKey];
@@ -214,8 +245,8 @@ class FilterManager {
 
         const currentValue = this.filterElements[this.activeFilterKey]?.value || '';
 
-        const availableSet = new Set(availableOptions.map(v => String(v)));
-        const unavailableOptions = allOptionsList.filter(v => !availableSet.has(String(v)));
+        const availableSet = new Set(availableOptions.map(option => this.getOptionKey(option)));
+        const unavailableOptions = allOptionsList.filter(option => !availableSet.has(this.getOptionKey(option)));
 
         this.renderModalList(availableOptions, currentValue, false, config);
         this.renderUnavailableList(unavailableOptions, config);
@@ -238,19 +269,25 @@ class FilterManager {
         if (currentValue && currentValue !== '') {
             const selectedDiv = document.createElement('div');
             selectedDiv.className = 'filter-modal-option selected-current';
-            selectedDiv.textContent = currentValue;
+            const selectedOption = options.find(option =>
+                String(this.getOptionValue(option)) === String(currentValue)
+            );
+            selectedDiv.textContent = selectedOption
+                ? this.getOptionLabel(selectedOption)
+                : currentValue;
             selectedDiv.title = 'Currently selected — click "Clear Selection" to change';
             list.appendChild(selectedDiv);
         }
 
-        options.forEach(value => {
-            if (String(value) === String(currentValue)) return;
+        options.forEach(option => {
+            const optionValue = this.getOptionValue(option);
+            if (String(optionValue) === String(currentValue)) return;
 
             const div = document.createElement('div');
             div.className = 'filter-modal-option';
-            div.textContent = value;
-            div.dataset.value = value;
-            div.addEventListener('click', () => this.selectFilterValue(value));
+            div.textContent = this.getOptionLabel(option);
+            div.dataset.value = String(optionValue);
+            div.addEventListener('click', () => this.selectFilterValue(optionValue));
             list.appendChild(div);
         });
     }
@@ -269,10 +306,10 @@ class FilterManager {
         section.classList.remove('hidden');
         list.textContent = '';
 
-        options.forEach(value => {
+        options.forEach(option => {
             const div = document.createElement('div');
             div.className = 'filter-modal-option unavailable';
-            div.textContent = value;
+            div.textContent = this.getOptionLabel(option);
             list.appendChild(div);
         });
     }
@@ -289,13 +326,21 @@ class FilterManager {
         const currentValue = this.filterElements[this.activeFilterKey]?.value || '';
 
         const filteredAvailable = searchTerm
-            ? availableOptions.filter(v => String(v).toLowerCase().includes(searchTerm))
+            ? availableOptions.filter(option => {
+                const label = this.getOptionLabel(option).toLowerCase();
+                const value = String(this.getOptionValue(option)).toLowerCase();
+                return label.includes(searchTerm) || value.includes(searchTerm);
+            })
             : availableOptions;
 
-        const availableSet = new Set(availableOptions.map(v => String(v)));
-        const unavailableOptions = allOptionsList.filter(v => !availableSet.has(String(v)));
+        const availableSet = new Set(availableOptions.map(option => this.getOptionKey(option)));
+        const unavailableOptions = allOptionsList.filter(option => !availableSet.has(this.getOptionKey(option)));
         const filteredUnavailable = searchTerm
-            ? unavailableOptions.filter(v => String(v).toLowerCase().includes(searchTerm))
+            ? unavailableOptions.filter(option => {
+                const label = this.getOptionLabel(option).toLowerCase();
+                const value = String(this.getOptionValue(option)).toLowerCase();
+                return label.includes(searchTerm) || value.includes(searchTerm);
+            })
             : unavailableOptions;
 
         this.renderModalList(filteredAvailable, currentValue, true, config);

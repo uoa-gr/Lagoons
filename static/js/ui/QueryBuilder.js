@@ -173,6 +173,23 @@ class QueryBuilder {
         return key ? (this.filterOptions[key] || []) : [];
     }
 
+    getOptionValue(option) {
+        if (option && typeof option === 'object') {
+            return option.value ?? option.name_en ?? '';
+        }
+        return option;
+    }
+
+    getOptionLabel(option) {
+        if (option && typeof option === 'object') {
+            if (option.label != null && option.label !== '') {
+                return String(option.label);
+            }
+            return String(this.getOptionValue(option));
+        }
+        return String(option ?? '');
+    }
+
     renderConditionRow(condition, index, isInGroup = false) {
         const row = document.createElement('div');
         row.className = 'query-condition-row' + (isInGroup ? ' grouped' : '');
@@ -183,9 +200,11 @@ class QueryBuilder {
         const needsValue  = !['is_null', 'is_not_null'].includes(condition.operator);
         const fieldValues = this.getFieldValues(condition.field);
 
-        const valueOpts = fieldValues.map(v =>
-            `<option value="${escapeHtml(String(v))}" ${String(condition.value) === String(v) ? 'selected' : ''}>${escapeHtml(String(v))}</option>`
-        ).join('');
+        const valueOpts = fieldValues.map(option => {
+            const optionValue = this.getOptionValue(option);
+            const optionLabel = this.getOptionLabel(option);
+            return `<option value="${escapeHtml(String(optionValue))}" ${String(condition.value) === String(optionValue) ? 'selected' : ''}>${escapeHtml(optionLabel)}</option>`;
+        }).join('');
 
         row.innerHTML = `
             ${index > 0
