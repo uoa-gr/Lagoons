@@ -1082,7 +1082,7 @@ body.sidebar-collapsed .rail-btn:hover {
     color: #1e1e1e;
     font-size: 0.75rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: flex-start;
     padding: 0 0.75rem 0.5rem;
     z-index: 1000;
@@ -2688,18 +2688,16 @@ body.sidebar-collapsed .rail-btn:hover {
 .welcome-university-icon {
     width: 34px;
     height: 34px;
-    border: 1px solid var(--border-color);
-    background: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.welcome-university-icon svg {
-    width: 20px;
-    height: 20px;
-    color: var(--text-primary);
+.welcome-university-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .welcome-university-text {
@@ -2719,31 +2717,6 @@ body.sidebar-collapsed .rail-btn:hover {
     font-size: 0.75rem;
     color: var(--text-secondary);
     line-height: 1.2;
-}
-
-.welcome-database-info {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-left: 3px solid var(--primary-color);
-    border-radius: 4px;
-}
-
-.welcome-database-info p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-}
-
-.welcome-research {
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-}
-
-.welcome-research p {
-    margin: 0;
 }
 
 .welcome-citation {
@@ -3537,8 +3510,7 @@ body.sidebar-open {
         padding: 0;
     }
 
-    .welcome-intro,
-    .welcome-research {
+    .welcome-intro {
         font-size: 0.85rem;
     }
 
@@ -3552,9 +3524,9 @@ body.sidebar-open {
         height: 30px;
     }
 
-    .welcome-university-icon svg {
-        width: 18px;
-        height: 18px;
+    .welcome-university-icon img {
+        width: 100%;
+        height: 100%;
     }
 
     .welcome-university-text strong {
@@ -3563,15 +3535,6 @@ body.sidebar-open {
 
     .welcome-university-text span {
         font-size: 0.7rem;
-    }
-
-    .welcome-database-info {
-        padding: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .welcome-database-info p {
-        font-size: 0.8rem;
     }
 
     .welcome-citation {
