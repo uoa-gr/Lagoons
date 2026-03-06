@@ -2804,6 +2804,41 @@ body.sidebar-collapsed .rail-btn:hover {
   opacity: 0.7;
 }
 
+/* Individual lagoon centroid marker */
+.lagoon-marker {
+    width: 14px;
+    height: 14px;
+    background: var(--accent-blue);
+    border: 2.5px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lagoon-marker:hover {
+    transform: scale(1.35);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+}
+
+/* Cluster icons */
+.cluster-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.cluster-small  { width: 34px; height: 34px; font-size: 13px; }
+.cluster-medium { width: 42px; height: 42px; font-size: 14px; opacity: 0.92; }
+.cluster-large  { width: 52px; height: 52px; font-size: 15px; opacity: 0.85; }
+
 /* Marker Cluster Customization */
 .marker-cluster {
     background: var(--accent-blue);
