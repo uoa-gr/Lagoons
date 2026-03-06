@@ -1,5 +1,5 @@
 /**
- * EmailHelper - Contact & feedback emails for Greek Lagoons WebGIS
+ * EmailHelper - Contact & feedback emails for Lagoons WebGIS
  */
 
 import { escapeHtml } from './helpers.js';
@@ -14,7 +14,7 @@ class EmailHelper {
      * Open mail client for a data submission
      */
     openSubmitDataEmail(data = {}) {
-        const subject = encodeURIComponent('Greek Lagoons WebGIS – Data Submission');
+        const subject = encodeURIComponent('Lagoons WebGIS – Data Submission');
         const body    = encodeURIComponent(this._buildSubmitBody(data));
         this._open(subject, body);
     }
@@ -23,7 +23,7 @@ class EmailHelper {
      * Open mail client for a bug report
      */
     openBugReportEmail(data = {}) {
-        const subject = encodeURIComponent('Greek Lagoons WebGIS – Bug Report');
+        const subject = encodeURIComponent('Lagoons WebGIS – Bug Report');
         const body    = encodeURIComponent(this._buildBugBody(data));
         this._open(subject, body);
     }
@@ -32,12 +32,12 @@ class EmailHelper {
      * Open mail client for a feature suggestion
      */
     openSuggestionEmail(data = {}) {
-        const subject = encodeURIComponent('Greek Lagoons WebGIS – Suggestion');
+        const subject = encodeURIComponent('Lagoons WebGIS – Suggestion');
         const body    = encodeURIComponent(this._buildSuggestionBody(data));
         this._open(subject, body);
     }
 
-    // ── Private ──────────────────────────────────────────────────────────────
+    // ── Private ────────────────────────────────────────────────────────────────────
 
     _open(subject, body) {
         const to = this.recipients.join(',');
@@ -71,7 +71,7 @@ class EmailHelper {
         return [
             'Dear Team,',
             '',
-            'I have encountered an issue with the Greek Lagoons WebGIS:',
+            'I have encountered an issue with the Lagoons WebGIS:',
             '',
             `Description: ${d.description || ''}`,
             `Steps to reproduce: ${d.steps || ''}`,
@@ -87,7 +87,7 @@ class EmailHelper {
         return [
             'Dear Team,',
             '',
-            'I have a suggestion for the Greek Lagoons WebGIS:',
+            'I have a suggestion for the Lagoons WebGIS:',
             '',
             `Suggestion: ${d.suggestion || ''}`,
             `Reason / benefit: ${d.reason || ''}`,
