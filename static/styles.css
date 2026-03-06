@@ -2808,7 +2808,7 @@ body.sidebar-collapsed .rail-btn:hover {
 .lagoon-marker {
     width: 14px;
     height: 14px;
-    background: var(--accent-blue);
+    background: #111;
     border: 2.5px solid #fff;
     border-radius: 50%;
     box-shadow: 0 1px 4px rgba(0,0,0,0.35);
