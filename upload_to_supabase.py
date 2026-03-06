@@ -23,10 +23,10 @@ from shapely.geometry import mapping
 # ---------------------------------------------------------------------------
 # Configuration – replace with your actual values before running
 # ---------------------------------------------------------------------------
-SUPABASE_URL = "YOUR_SUPABASE_URL"          # e.g. https://xxxx.supabase.co
-SUPABASE_SERVICE_KEY = "YOUR_SERVICE_KEY"   # service_role key (never commit!)
+SUPABASE_URL = "https://gemokuqzdurkkgkyseix.supabase.co"          # e.g. https://xxxx.supabase.co
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlbW9rdXF6ZHVya2tna3lzZWl4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NzU1MTkzNiwiZXhwIjoyMDczMTI3OTM2fQ.q6N_aZwi3VNSAXokb4oOaGU3wuPA9SZqV38l8trKBlY"   # service_role key (never commit!)
 
-SHP_PATH = "data/shp/Greek_lagoons_20250727.shp"
+SHP_PATH = "data/Greek_lagoons_20250727.shp"
 TABLE    = "lagoons"
 BATCH    = 50   # records per POST request
 # ---------------------------------------------------------------------------
