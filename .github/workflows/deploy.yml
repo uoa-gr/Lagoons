@@ -25,13 +25,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject config.js from secrets
-        run: |
-          cat > static/config.js <<EOF
-          window.SUPABASE_URL     = "${{ secrets.SUPABASE_URL }}";
-          window.SUPABASE_ANON_KEY = "${{ secrets.SUPABASE_ANON_KEY }}";
-          window.DEBUG_MODE = false;
-          EOF
+      - name: Build config.js from secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: node build.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
