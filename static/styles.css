@@ -2826,7 +2826,7 @@ body.sidebar-collapsed .rail-btn:hover {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--accent-blue);
+    background: #111;
     border: 3px solid #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.35);
     color: #fff;
@@ -2841,14 +2841,14 @@ body.sidebar-collapsed .rail-btn:hover {
 
 /* Marker Cluster Customization */
 .marker-cluster {
-    background: var(--accent-blue);
+    background: #111;
     border: 3px solid var(--background-secondary);
     box-shadow: var(--shadow-md);
 }
 
 .marker-cluster div {
     background: var(--background-secondary);
-    color: var(--accent-blue);
+    color: #111;
     font-weight: 600;
 }
 
