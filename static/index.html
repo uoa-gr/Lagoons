@@ -417,6 +417,31 @@
             </div>
         </div>
 
+        <!-- Filter Selection Modal -->
+        <div id="filter-selection-modal" class="modal filter-selection-modal">
+            <div class="modal-content filter-selection-modal-content">
+                <div class="modal-header">
+                    <h3 id="filter-modal-title">Select Filter</h3>
+                    <button class="modal-close" id="close-filter-selection" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-modal-search">
+                        <input type="text" id="filter-modal-search-input" class="filter-modal-search-input"
+                            placeholder="Search..." autocomplete="off">
+                    </div>
+                    <div id="filter-modal-list" class="filter-modal-list"></div>
+                    <div id="filter-modal-unavailable-section" class="filter-modal-unavailable-section hidden">
+                        <div class="filter-modal-unavailable-label">Not available with current filters:</div>
+                        <div id="filter-modal-unavailable-list"
+                            class="filter-modal-list filter-modal-unavailable-list"></div>
+                    </div>
+                    <div class="filter-modal-footer">
+                        <button id="filter-modal-clear" class="btn-secondary">Clear Selection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SQL Query Builder Modal -->
         <div id="sql-filter-modal" class="modal sql-filter-modal">
             <div class="modal-content">

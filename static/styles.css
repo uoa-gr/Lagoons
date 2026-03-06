@@ -4406,6 +4406,23 @@ body.modal-open {
     background: transparent;
 }
 
+.filter-modal-unavailable-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-modal-footer {
+    flex-shrink: 0;
+    padding-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Responsive filter modal */
 @media (max-width: 480px) {
     .filter-selection-modal .modal-content {

@@ -1,9 +1,9 @@
 /**
- * FilterManager - Four filters for Greek Lagoons
- * Location / Island / RCP 2.6 Inundated / RCP 8.5 Inundated
+ * FilterManager - Modal-based filter UI for Greek Lagoons
+ * Filters: Location / Island / RCP 2.6 Inundated / RCP 8.5 Inundated
  */
 
-import { escapeHtml } from '../utils/helpers.js';
+import { escapeHtml, debounce } from '../utils/helpers.js';
 
 class FilterManager {
     constructor(eventBus, stateManager, dataManager) {
@@ -11,174 +11,572 @@ class FilterManager {
         this.stateManager = stateManager;
         this.dataManager = dataManager;
 
-        // Map UI filter keys → state/API keys
+        this.isUpdatingFilters = false;
+        this.filterElements = {};
+        this.modalElements = {};
+
+        this.currentOptions = {};
+        this.allOptions = {};
+
+        this.activeFilterKey = null;
+
         this.filterConfig = {
             location: {
-                label:       'Location',
-                optionsKey:  'locations',
+                label: 'Location',
+                optionsKey: 'locations',
                 defaultText: 'All Locations',
-                selector:    '#location-filter'
+                searchable: true
             },
             island: {
-                label:       'Island',
-                optionsKey:  'islands',
+                label: 'Island',
+                optionsKey: 'islands',
                 defaultText: 'All Islands',
-                selector:    '#island-filter'
+                searchable: true
             },
             rcp2_6_inundated: {
-                label:       'RCP 2.6 Inundated',
-                optionsKey:  'rcp2_6_values',
+                label: 'RCP 2.6 Inundated',
+                optionsKey: 'rcp2_6_values',
                 defaultText: 'All',
-                selector:    '#rcp26-filter'
+                searchable: false
             },
             rcp8_5_inundated: {
-                label:       'RCP 8.5 Inundated',
-                optionsKey:  'rcp8_5_values',
+                label: 'RCP 8.5 Inundated',
+                optionsKey: 'rcp8_5_values',
                 defaultText: 'All',
-                selector:    '#rcp85-filter'
+                searchable: false
             }
         };
+    }
 
-        this.activeFilters = {
-            location:         null,
-            island:           null,
-            rcp2_6_inundated: null,
-            rcp8_5_inundated: null
-        };
+    async applyFilterValue(filterKey, value) {
+        if (!filterKey || value === undefined || value === null) return;
 
-        this.filterOptions = {
-            locations:     [],
-            islands:       [],
-            rcp2_6_values: [],
-            rcp8_5_values: []
-        };
+        const hiddenInput = this.filterElements[filterKey];
+        if (!hiddenInput) return;
 
-        this.elements = {};
+        hiddenInput.value = value;
+        this.updateSelectorValue(filterKey, value);
+        await this.handleFilterChange();
     }
 
     init() {
         this.cacheElements();
-        this.bindDropdownEvents();
-        this.bindFilterOptionsUpdates();
-        this.bindClearButtons();
+        this.initEventListeners();
+        this.initStateSubscriptions();
 
-        if (window.DEBUG_MODE) console.log('✅ FilterManager: Initialized');
+        if (window.DEBUG_MODE) {
+            console.log('✅ FilterManager: Initialized');
+        }
     }
 
     cacheElements() {
-        Object.entries(this.filterConfig).forEach(([key, cfg]) => {
-            this.elements[key] = document.querySelector(cfg.selector);
-        });
+        this.filterElements = {
+            location: document.getElementById('location-filter'),
+            locationBtn: document.getElementById('location-filter-btn'),
+            locationBadge: document.getElementById('location-filter-badge'),
+            island: document.getElementById('island-filter'),
+            islandBtn: document.getElementById('island-filter-btn'),
+            islandBadge: document.getElementById('island-filter-badge'),
+            rcp2_6_inundated: document.getElementById('rcp26-filter'),
+            rcp2_6_inundatedBtn: document.getElementById('rcp26-filter-btn'),
+            rcp2_6_inundatedBadge: document.getElementById('rcp26-filter-badge'),
+            rcp8_5_inundated: document.getElementById('rcp85-filter'),
+            rcp8_5_inundatedBtn: document.getElementById('rcp85-filter-btn'),
+            rcp8_5_inundatedBadge: document.getElementById('rcp85-filter-badge'),
+            clearBtn: document.getElementById('clear-filters'),
+            activeFiltersSummary: document.getElementById('active-filters-summary'),
+            activeFiltersList: document.getElementById('active-filters-list'),
+            filterLoading: document.getElementById('filter-loading'),
+            filterError: document.getElementById('filter-error')
+        };
 
-        this.elements.clearAllBtn   = document.getElementById('clear-all-filters');
-        this.elements.filterSection = document.getElementById('filters-tab');
+        this.modalElements = {
+            modal: document.getElementById('filter-selection-modal'),
+            title: document.getElementById('filter-modal-title'),
+            searchInput: document.getElementById('filter-modal-search-input'),
+            list: document.getElementById('filter-modal-list'),
+            unavailableSection: document.getElementById('filter-modal-unavailable-section'),
+            unavailableList: document.getElementById('filter-modal-unavailable-list'),
+            clearBtn: document.getElementById('filter-modal-clear'),
+            closeBtn: document.getElementById('close-filter-selection')
+        };
     }
 
-    bindDropdownEvents() {
-        Object.entries(this.filterConfig).forEach(([key, cfg]) => {
-            const el = this.elements[key];
-            if (!el) return;
+    initEventListeners() {
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            const btn = this.filterElements[`${filterKey}Btn`];
+            if (btn) {
+                btn.addEventListener('click', () => this.openFilterModal(filterKey));
+            }
+        });
 
-            el.addEventListener('change', async () => {
-                const value = el.value || null;
-                this.activeFilters[key] = value;
-                await this.applyFilters();
+        if (this.filterElements.clearBtn) {
+            this.filterElements.clearBtn.addEventListener('click', () => this.clearFilters());
+        }
+
+        if (this.modalElements.closeBtn) {
+            this.modalElements.closeBtn.addEventListener('click', () => this.closeFilterModal());
+        }
+
+        if (this.modalElements.modal) {
+            this.modalElements.modal.addEventListener('click', (e) => {
+                if (e.target === this.modalElements.modal) {
+                    this.closeFilterModal();
+                }
             });
-        });
-    }
+        }
 
-    bindFilterOptionsUpdates() {
-        this.eventBus.on('filterOptions:loaded', ({ options }) => {
-            this.filterOptions = { ...this.filterOptions, ...options };
-            this.populateDropdowns();
-        });
-    }
+        if (this.modalElements.clearBtn) {
+            this.modalElements.clearBtn.addEventListener('click', () => this.clearCurrentFilter());
+        }
 
-    bindClearButtons() {
-        this.elements.clearAllBtn?.addEventListener('click', async () => {
-            this.clearAllFilters();
-            await this.applyFilters();
-        });
+        if (this.modalElements.searchInput) {
+            this.modalElements.searchInput.addEventListener('input', debounce(() => {
+                this.filterModalOptions();
+            }, 150));
+        }
 
-        // Individual filter badges cleared from FilterDisplay
-        this.eventBus.on('filter:removeIndividual', async ({ filterKey }) => {
-            if (filterKey in this.activeFilters) {
-                this.activeFilters[filterKey] = null;
-                const el = this.elements[filterKey];
-                if (el) el.value = '';
-                await this.applyFilters();
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.modalElements.modal?.classList.contains('active')) {
+                this.closeFilterModal();
             }
         });
     }
 
-    populateDropdowns() {
-        Object.entries(this.filterConfig).forEach(([key, cfg]) => {
-            const el = this.elements[key];
-            if (!el) return;
-
-            const opts = this.filterOptions[cfg.optionsKey] || [];
-            const current = this.activeFilters[key];
-
-            // Keep current selection if it's still available
-            el.innerHTML = `<option value="">${cfg.defaultText}</option>`;
-            opts.forEach(val => {
-                if (val == null || val === '') return;
-                const opt = document.createElement('option');
-                opt.value = val;
-                opt.textContent = val;
-                if (val === current) opt.selected = true;
-                el.appendChild(opt);
-            });
+    initStateSubscriptions() {
+        this.eventBus.on('filterOptions:loaded', ({ options, allOptions }) => {
+            this.currentOptions = options;
+            if (allOptions) {
+                this.allOptions = allOptions;
+            }
+            this.updateAllBadges();
+            this.updateSelectorValues();
         });
+
+        this.eventBus.on('filter:removeIndividual', ({ filterKey }) => {
+            this.clearIndividualFilter(filterKey);
+        });
+    }
+
+    openFilterModal(filterKey) {
+        this.activeFilterKey = filterKey;
+        const config = this.filterConfig[filterKey];
+
+        if (!config || !this.modalElements.modal) return;
+
+        if (this.modalElements.title) {
+            this.modalElements.title.textContent = `Select ${config.label}`;
+        }
+
+        if (this.modalElements.searchInput) {
+            this.modalElements.searchInput.value = '';
+            this.modalElements.searchInput.parentElement.style.display =
+                config.searchable ? '' : 'none';
+        }
+
+        this.populateModalOptions();
+
+        this.modalElements.modal.classList.add('active');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => {
+            if (config.searchable && this.modalElements.searchInput) {
+                this.modalElements.searchInput.focus();
+            }
+        }, 100);
+    }
+
+    closeFilterModal() {
+        if (this.modalElements.modal) {
+            this.modalElements.modal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+        this.activeFilterKey = null;
+    }
+
+    populateModalOptions() {
+        if (!this.activeFilterKey) return;
+
+        const config = this.filterConfig[this.activeFilterKey];
+        const optionsKey = config.optionsKey;
+
+        const availableOptions = this.currentOptions[optionsKey] || [];
+        const allOptionsList = this.allOptions[optionsKey] || availableOptions;
+
+        const currentValue = this.filterElements[this.activeFilterKey]?.value || '';
+
+        const availableSet = new Set(availableOptions.map(v => String(v)));
+        const unavailableOptions = allOptionsList.filter(v => !availableSet.has(String(v)));
+
+        this.renderModalList(availableOptions, currentValue, false, config);
+        this.renderUnavailableList(unavailableOptions, config);
+    }
+
+    renderModalList(options, currentValue, isFiltered = false, config = null) {
+        const list = this.modalElements.list;
+        if (!list) return;
+
+        list.textContent = '';
+
+        if (options.length === 0 && (!currentValue || currentValue === '')) {
+            const empty = document.createElement('div');
+            empty.className = 'filter-modal-no-results';
+            empty.textContent = 'No options available';
+            list.appendChild(empty);
+            return;
+        }
+
+        if (currentValue && currentValue !== '') {
+            const selectedDiv = document.createElement('div');
+            selectedDiv.className = 'filter-modal-option selected-current';
+            selectedDiv.textContent = currentValue;
+            selectedDiv.title = 'Currently selected — click "Clear Selection" to change';
+            list.appendChild(selectedDiv);
+        }
+
+        options.forEach(value => {
+            if (String(value) === String(currentValue)) return;
+
+            const div = document.createElement('div');
+            div.className = 'filter-modal-option';
+            div.textContent = value;
+            div.dataset.value = value;
+            div.addEventListener('click', () => this.selectFilterValue(value));
+            list.appendChild(div);
+        });
+    }
+
+    renderUnavailableList(options, config = null) {
+        const section = this.modalElements.unavailableSection;
+        const list = this.modalElements.unavailableList;
+
+        if (!section || !list) return;
+
+        if (options.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        list.textContent = '';
+
+        options.forEach(value => {
+            const div = document.createElement('div');
+            div.className = 'filter-modal-option unavailable';
+            div.textContent = value;
+            list.appendChild(div);
+        });
+    }
+
+    filterModalOptions() {
+        const searchTerm = this.modalElements.searchInput?.value?.toLowerCase() || '';
+        const config = this.filterConfig[this.activeFilterKey];
+        const optionsKey = config?.optionsKey;
+
+        if (!optionsKey) return;
+
+        const availableOptions = this.currentOptions[optionsKey] || [];
+        const allOptionsList = this.allOptions[optionsKey] || availableOptions;
+        const currentValue = this.filterElements[this.activeFilterKey]?.value || '';
+
+        const filteredAvailable = searchTerm
+            ? availableOptions.filter(v => String(v).toLowerCase().includes(searchTerm))
+            : availableOptions;
+
+        const availableSet = new Set(availableOptions.map(v => String(v)));
+        const unavailableOptions = allOptionsList.filter(v => !availableSet.has(String(v)));
+        const filteredUnavailable = searchTerm
+            ? unavailableOptions.filter(v => String(v).toLowerCase().includes(searchTerm))
+            : unavailableOptions;
+
+        this.renderModalList(filteredAvailable, currentValue, true, config);
+        this.renderUnavailableList(filteredUnavailable, config);
+    }
+
+    async selectFilterValue(value) {
+        if (!this.activeFilterKey) return;
+
+        const hiddenInput = this.filterElements[this.activeFilterKey];
+        if (hiddenInput) {
+            hiddenInput.value = value;
+        }
+
+        this.updateSelectorValue(this.activeFilterKey, value);
+        this.closeFilterModal();
+        await this.handleFilterChange();
+    }
+
+    async clearCurrentFilter() {
+        if (!this.activeFilterKey) return;
+
+        const hiddenInput = this.filterElements[this.activeFilterKey];
+        if (hiddenInput) {
+            hiddenInput.value = '';
+        }
+
+        this.updateSelectorValue(this.activeFilterKey, '');
+        this.closeFilterModal();
+        await this.handleFilterChange();
+    }
+
+    updateSelectorValue(filterKey, value) {
+        const btn = this.filterElements[`${filterKey}Btn`];
+        const config = this.filterConfig[filterKey];
+
+        if (!btn || !config) return;
+
+        const valueSpan = btn.querySelector('.filter-selector-value');
+        if (valueSpan) {
+            if (value && value !== '') {
+                valueSpan.textContent = value;
+                btn.classList.add('has-value');
+            } else {
+                valueSpan.textContent = config.defaultText;
+                btn.classList.remove('has-value');
+            }
+        }
+    }
+
+    updateSelectorValues() {
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            const value = this.filterElements[filterKey]?.value || '';
+            this.updateSelectorValue(filterKey, value);
+        });
+    }
+
+    updateAllBadges() {
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            this.updateBadge(filterKey);
+        });
+    }
+
+    updateBadge(filterKey) {
+        const config = this.filterConfig[filterKey];
+        const badge = this.filterElements[`${filterKey}Badge`];
+
+        if (!badge || !config) return;
+
+        const optionsKey = config.optionsKey;
+        const currentCount = this.currentOptions[optionsKey]?.length || 0;
+        const totalCount = this.allOptions[optionsKey]?.length || currentCount;
+
+        const selectedValue = this.filterElements[filterKey]?.value;
+        const hasSelection = selectedValue && selectedValue !== '';
+
+        if (hasSelection || totalCount === 0) {
+            badge.textContent = '';
+            badge.className = 'filter-selector-badge';
+            return;
+        }
+
+        badge.className = 'filter-selector-badge';
+        badge.textContent = `${currentCount} of ${totalCount}`;
+
+        if (currentCount === totalCount) {
+            badge.classList.add('badge-full');
+        } else {
+            badge.classList.add('badge-filtered');
+        }
+    }
+
+    async handleFilterChange() {
+        this.isUpdatingFilters = true;
+
+        try {
+            const filters = this.getActiveFilters();
+            this.showLoading(true);
+            await this.dataManager.fetchFilterOptions(filters);
+            this.eventBus.emit('filters:changed', { filters });
+            await this.applyFilters();
+        } finally {
+            this.isUpdatingFilters = false;
+            this.showLoading(false);
+        }
+    }
+
+    getActiveFilters() {
+        return {
+            location: this.filterElements.location?.value || null,
+            island: this.filterElements.island?.value || null,
+            rcp2_6_inundated: this.filterElements.rcp2_6_inundated?.value || null,
+            rcp8_5_inundated: this.filterElements.rcp8_5_inundated?.value || null
+        };
     }
 
     async applyFilters() {
         const filters = this.getActiveFilters();
-        this.stateManager.set('activeFilters', filters);
 
-        this.eventBus.emit('filters:apply', { filters });
+        const cleanFilters = {};
+        let activeCount = 0;
 
-        // Cross-filter: refresh options based on remaining context
-        await this.dataManager.fetchFilterOptions(filters);
-    }
-
-    async applyFilterValue(key, value) {
-        if (!(key in this.activeFilters)) return;
-
-        this.activeFilters[key] = value || null;
-        const el = this.elements[key];
-        if (el) el.value = value || '';
-
-        await this.applyFilters();
-    }
-
-    getActiveFilters() {
-        const active = {};
-        Object.entries(this.activeFilters).forEach(([k, v]) => {
-            if (v !== null && v !== '') active[k] = v;
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== '') {
+                cleanFilters[key] = value;
+                activeCount++;
+            }
         });
-        return active;
-    }
 
-    clearAllFilters() {
-        Object.keys(this.activeFilters).forEach(k => {
-            this.activeFilters[k] = null;
-            const el = this.elements[k];
-            if (el) el.value = '';
-        });
+        this.updateActiveFiltersDisplay(cleanFilters);
+        this.updateMobileFilterIndicator(activeCount, cleanFilters);
+        this.closeMobileSidebar();
+
+        this.eventBus.emit('filters:apply', { filters: cleanFilters });
     }
 
     updateActiveFiltersDisplay(filters) {
-        Object.entries(this.filterConfig).forEach(([key, _]) => {
-            const el = this.elements[key];
-            if (el) el.value = filters[key] || '';
-            this.activeFilters[key] = filters[key] || null;
+        const { activeFiltersSummary, activeFiltersList } = this.filterElements;
+        if (!activeFiltersSummary || !activeFiltersList) return;
+
+        activeFiltersList.textContent = '';
+
+        const filterLabels = {
+            location: 'Location',
+            island: 'Island',
+            rcp2_6_inundated: 'RCP 2.6',
+            rcp8_5_inundated: 'RCP 8.5'
+        };
+
+        const activeCount = Object.keys(filters).length;
+
+        if (activeCount === 0) {
+            activeFiltersSummary.classList.add('hidden');
+            return;
+        }
+
+        activeFiltersSummary.classList.remove('hidden');
+
+        Object.entries(filters).forEach(([filterKey, filterValue]) => {
+            const filterLabel = filterLabels[filterKey] || filterKey;
+            const badge = this.createFilterBadge(filterLabel, filterValue, filterKey);
+            activeFiltersList.appendChild(badge);
         });
     }
 
+    createFilterBadge(label, value, filterKey) {
+        const badge = document.createElement('div');
+        badge.className = 'filter-badge';
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'filter-badge-label';
+        labelSpan.textContent = `${label}:`;
+
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'filter-badge-value';
+        valueSpan.textContent = escapeHtml(String(value));
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'filter-badge-remove';
+        removeBtn.textContent = '\u00d7';
+        removeBtn.title = `Remove ${label} filter`;
+        removeBtn.addEventListener('click', () => this.clearIndividualFilter(filterKey));
+
+        badge.appendChild(labelSpan);
+        badge.appendChild(valueSpan);
+        badge.appendChild(removeBtn);
+
+        return badge;
+    }
+
+    updateMobileFilterIndicator(count, filters) {
+        const toggleBtn = document.getElementById('mobile-filters-toggle');
+        if (!toggleBtn) return;
+
+        if (count > 0) {
+            if (window.innerWidth <= 480) {
+                toggleBtn.textContent = `Filters (${count})`;
+            } else {
+                const filterNames = [];
+                if (filters.location) filterNames.push('Location');
+                if (filters.island) filterNames.push('Island');
+                if (filters.rcp2_6_inundated) filterNames.push('RCP 2.6');
+                if (filters.rcp8_5_inundated) filterNames.push('RCP 8.5');
+                toggleBtn.textContent = `Filters: ${filterNames.join(', ')}`;
+            }
+        } else {
+            toggleBtn.textContent = 'Filters';
+        }
+    }
+
+    closeMobileSidebar() {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('mobile-filters-toggle');
+            if (sidebar && toggleBtn) {
+                sidebar.classList.remove('active');
+                toggleBtn.classList.remove('active');
+            }
+        }
+    }
+
+    async clearIndividualFilter(filterKey) {
+        const hiddenInput = this.filterElements[filterKey];
+        if (hiddenInput) {
+            hiddenInput.value = '';
+        }
+
+        this.updateSelectorValue(filterKey, '');
+
+        const filters = this.getActiveFilters();
+        await this.dataManager.fetchFilterOptions(filters);
+        await this.applyFilters();
+    }
+
+    async clearFilters() {
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            const hiddenInput = this.filterElements[filterKey];
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+            this.updateSelectorValue(filterKey, '');
+        });
+
+        if (this.filterElements.activeFiltersSummary) {
+            this.filterElements.activeFiltersSummary.classList.add('hidden');
+        }
+
+        await this.dataManager.fetchFilterOptions({});
+        this.updateMobileFilterIndicator(0, {});
+        this.eventBus.emit('filters:apply', { filters: {} });
+    }
+
+    showLoading(show) {
+        if (this.filterElements.filterLoading) {
+            if (show) {
+                this.filterElements.filterLoading.classList.remove('hidden');
+            } else {
+                this.filterElements.filterLoading.classList.add('hidden');
+            }
+        }
+
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            const btn = this.filterElements[`${filterKey}Btn`];
+            if (btn) {
+                btn.style.opacity = show ? '0.6' : '1';
+                btn.disabled = show;
+            }
+        });
+    }
+
+    showError(message) {
+        if (this.filterElements.filterError) {
+            this.filterElements.filterError.textContent = message;
+            this.filterElements.filterError.classList.remove('hidden');
+        }
+    }
+
+    hideError() {
+        if (this.filterElements.filterError) {
+            this.filterElements.filterError.classList.add('hidden');
+        }
+    }
+
     disableFilters() {
-        Object.values(this.elements).forEach(el => {
-            if (el && el.tagName === 'SELECT') el.disabled = true;
+        Object.keys(this.filterConfig).forEach(filterKey => {
+            const btn = this.filterElements[`${filterKey}Btn`];
+            if (btn) {
+                btn.disabled = true;
+                btn.classList.add('filter-error-state');
+            }
         });
     }
 }

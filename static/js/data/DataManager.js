@@ -10,6 +10,7 @@ class DataManager {
         this.supabase = null;
         this.BATCH_SIZE = 1000;
         this.CACHE_TTL = 5 * 60 * 1000;
+        this.allOptions = null;
     }
 
     async init() {
@@ -86,7 +87,7 @@ class DataManager {
     async fetchFilterOptions(activeFilters = {}) {
         const cacheKey = `filterOptions:${JSON.stringify(activeFilters)}`;
         const cached = this.cacheManager.get(cacheKey);
-        if (cached) { this.eventBus.emit('filterOptions:loaded', { options: cached }); return cached; }
+        if (cached) { this.eventBus.emit('filterOptions:loaded', { options: cached, allOptions: this.allOptions || cached }); return cached; }
 
         const [locResult, islResult, rcp26Result, rcp85Result] = await Promise.all([
             this.supabase.rpc('api_lagoons_filter_locations', { p_island_en: activeFilters.island || null, p_rcp2_6_inundated: activeFilters.rcp2_6_inundated || null, p_rcp8_5_inundated: activeFilters.rcp8_5_inundated || null }),
@@ -102,9 +103,15 @@ class DataManager {
             rcp8_5_values: (rcp85Result.data || []).map(r => r.rcp8_5_inundated)
         };
 
+        // Store unfiltered options as the "all options" baseline for badge counts
+        const hasFilters = Object.values(activeFilters).some(v => v !== null && v !== undefined && v !== '');
+        if (!hasFilters) {
+            this.allOptions = options;
+        }
+
         this.cacheManager.set(cacheKey, options, this.CACHE_TTL);
         this.stateManager.set('filterOptions', options);
-        this.eventBus.emit('filterOptions:loaded', { options });
+        this.eventBus.emit('filterOptions:loaded', { options, allOptions: this.allOptions || options });
         return options;
     }
 
@@ -116,8 +123,11 @@ class DataManager {
             rcp2_6_values: toUnique(data.map(r => r.rcp2_6_inundated)),
             rcp8_5_values: toUnique(data.map(r => r.rcp8_5_inundated))
         };
+        if (!this.allOptions) {
+            this.allOptions = options;
+        }
         this.stateManager.set('filterOptions', options);
-        this.eventBus.emit('filterOptions:loaded', { options });
+        this.eventBus.emit('filterOptions:loaded', { options, allOptions: this.allOptions });
     }
 }
 
