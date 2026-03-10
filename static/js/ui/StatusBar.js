@@ -10,14 +10,12 @@ class StatusBar {
         this.eventBus     = eventBus;
         this.stateManager = stateManager;
         this.container    = null;
-        this.POLYGON_ZOOM_THRESHOLD = 11;
 
         this.elements = {
             total:          null,
             filtered:       null,
             connectionDot:  null,
             zoom:           null,
-            polygonMode:    null,
             scaleContainer: null
         };
 
@@ -45,16 +43,8 @@ class StatusBar {
             <div class="status-bar-left-col">
                 <div class="status-bar-legend">
                     <div class="legend-row">
-                        <span class="legend-dot high"></span>
-                        <span class="legend-text">High importance</span>
-                    </div>
-                    <div class="legend-row">
-                        <span class="legend-dot medium"></span>
-                        <span class="legend-text">Medium importance</span>
-                    </div>
-                    <div class="legend-row">
-                        <span class="legend-dot low"></span>
-                        <span class="legend-text">Low importance</span>
+                        <span class="legend-dot lagoon"></span>
+                        <span class="legend-text">Lagoon</span>
                     </div>
                 </div>
                 <div class="status-bar-left">
@@ -74,10 +64,6 @@ class StatusBar {
                     <span class="status-label">Zoom</span>
                     <span class="status-value" id="status-zoom">-</span>
                 </div>
-                <div class="status-item">
-                    <span class="status-label">Polygons</span>
-                    <span class="status-value" id="status-polygons">OFF</span>
-                </div>
                 <div class="status-item status-connection">
                     <span class="status-dot online" id="status-conn-dot"></span>
                 </div>
@@ -89,7 +75,6 @@ class StatusBar {
         this.elements.filtered      = this.container.querySelector('#status-filtered');
         this.elements.connectionDot = this.container.querySelector('#status-conn-dot');
         this.elements.zoom          = this.container.querySelector('#status-zoom');
-        this.elements.polygonMode   = this.container.querySelector('#status-polygons');
         this.elements.scaleContainer = this.container.querySelector('#status-scale');
     }
 
@@ -97,17 +82,14 @@ class StatusBar {
         this._updateCartographicScale();
         this.map.on('moveend zoomend', () => this._updateCartographicScale());
 
-        this.updateMapModeStats();
-        this.map.on('zoomend', () => this.updateMapModeStats());
+        this._updateZoom();
+        this.map.on('zoomend', () => this._updateZoom());
     }
 
-    updateMapModeStats() {
+    _updateZoom() {
         if (!this.map) return;
         const zoom = this.map.getZoom();
-        const polygonsOn = zoom >= this.POLYGON_ZOOM_THRESHOLD;
-
         if (this.elements.zoom) this.elements.zoom.textContent = formatNumber(zoom);
-        if (this.elements.polygonMode) this.elements.polygonMode.textContent = polygonsOn ? 'ON' : 'OFF';
     }
 
     /** Round maxVal down to a cartographically nice number (1, 2, 5, 10, 20, …). */

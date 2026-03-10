@@ -44,10 +44,10 @@ class LagoonPreviewMap {
             try {
                 const polygon = L.geoJSON(polygonGeoJson, {
                     style: {
-                        color: '#0f172a',
-                        weight: 1.75,
+                        color: '#1e3a5f',
+                        weight: 2.5,
                         fillColor: '#1d4ed8',
-                        fillOpacity: 0.26
+                        fillOpacity: 0.35
                     }
                 }).addTo(map);
 
@@ -114,10 +114,10 @@ class LagoonPreviewMap {
             if (pointBounds) {
                 map.setView(bounds.getCenter(), options.pointZoom || POINT_ZOOM);
             } else {
-                map.fitBounds(bounds.pad(0.35), {
+                map.fitBounds(bounds.pad(0.15), {
                     animate: false,
                     maxZoom: options.maxZoom || MAX_PREVIEW_ZOOM,
-                    padding: [8, 8]
+                    padding: [4, 4]
                 });
             }
             return;

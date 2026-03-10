@@ -1136,19 +1136,10 @@ body.sidebar-collapsed .rail-btn:hover {
     flex-shrink: 0;
 }
 
-.legend-dot.high {
-    background: #dc2626;
-    border: 1.5px solid #fecaca;
-}
-
-.legend-dot.medium {
-    background: #f97316;
-    border: 1.5px solid #fed7aa;
-}
-
-.legend-dot.low {
-    background: #0d9488;
-    border: 1.5px solid #99f6e4;
+.legend-dot.lagoon {
+    background: #111;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 
 .legend-text {
@@ -1422,7 +1413,7 @@ body.sidebar-collapsed .rail-btn:hover {
 .carto-scale {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .carto-scale-bar {
@@ -2788,49 +2779,37 @@ body.sidebar-collapsed .rail-btn:hover {
     margin: 0;
 }
 
-.welcome-university {
-    margin-bottom: 1.25rem;
+.welcome-logo-row {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0.9rem;
-    background: #f8f9fa;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    gap: 0.875rem;
 }
 
-.welcome-university-icon {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.welcome-logo {
+    height: 52px;
+    width: auto;
     flex-shrink: 0;
-}
-
-.welcome-university-icon img {
-    width: 100%;
-    height: 100%;
     object-fit: contain;
 }
 
-.welcome-university-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    min-width: 0;
-}
-
-.welcome-university-text strong {
-    font-size: 0.83rem;
-    color: var(--text-primary);
-    line-height: 1.25;
-}
-
-.welcome-university-text span {
-    font-size: 0.75rem;
+.welcome-research {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
     color: var(--text-secondary);
-    line-height: 1.2;
+}
+
+.welcome-research p {
+    margin: 0;
+}
+
+.welcome-research .welcome-logo-row {
+    align-items: center;
+}
+
+.welcome-research .welcome-logo-row p + p {
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
 }
 
 .welcome-citation {
@@ -3628,27 +3607,13 @@ body.sidebar-open {
         font-size: 0.85rem;
     }
 
-    .welcome-university {
-        padding: 0.65rem 0.75rem;
-        gap: 0.6rem;
+    .welcome-logo {
+        height: 40px;
     }
 
-    .welcome-university-icon {
-        width: 30px;
-        height: 30px;
-    }
-
-    .welcome-university-icon img {
-        width: 100%;
-        height: 100%;
-    }
-
-    .welcome-university-text strong {
-        font-size: 0.78rem;
-    }
-
-    .welcome-university-text span {
-        font-size: 0.7rem;
+    .welcome-intro,
+    .welcome-research {
+        font-size: 0.85rem;
     }
 
     .welcome-citation {

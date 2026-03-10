@@ -6,7 +6,7 @@
 import LagoonPreviewMap from './LagoonPreviewMap.js';
 import { escapeHtml } from '../utils/helpers.js';
 
-const POLYGON_ZOOM_THRESHOLD = 11;
+const POLYGON_ZOOM_THRESHOLD = 10;
 
 class PolygonManager {
     constructor(map, eventBus, stateManager, dataManager) {
