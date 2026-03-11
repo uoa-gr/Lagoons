@@ -25,12 +25,38 @@ class MarkerManager {
             zoomToBoundsOnClick: true,
             spiderfyOnMaxZoom: true,
             iconCreateFunction(cluster) {
-                const count = cluster.getChildCount();
+                const children = cluster.getAllChildMarkers();
+                const count = children.length;
                 let size = 'small';
                 if (count >= 100) size = 'large';
                 else if (count >= 10) size = 'medium';
+
+                // Count RCP categories
+                let high = 0, medium = 0, low = 0;
+                children.forEach(m => {
+                    const cat = m._rcpCategory;
+                    if (cat === 'high') high++;
+                    else if (cat === 'medium') medium++;
+                    else low++;
+                });
+
+                // Build conic-gradient pie segments
+                const total = high + medium + low;
+                const pHigh = (high / total) * 360;
+                const pMed  = (medium / total) * 360;
+
+                let bg;
+                if (high === total)       bg = '#dc2626';
+                else if (medium === total) bg = '#f97316';
+                else if (low === total)    bg = '#0d9488';
+                else {
+                    const s1 = pHigh;
+                    const s2 = s1 + pMed;
+                    bg = `conic-gradient(#dc2626 0deg ${s1}deg, #f97316 ${s1}deg ${s2}deg, #0d9488 ${s2}deg 360deg)`;
+                }
+
                 return L.divIcon({
-                    html: `<div class="cluster-icon cluster-${size}"><span>${count}</span></div>`,
+                    html: `<div class="cluster-icon cluster-${size}" style="background:${bg}"><span>${count}</span></div>`,
                     className: '',
                     iconSize: L.point(40, 40)
                 });
@@ -76,6 +102,11 @@ class MarkerManager {
             iconAnchor: [9, 9]
         });
         const marker = L.marker([lagoon.centroid_lat, lagoon.centroid_lng], { icon });
+
+        // Store category so cluster icons can read it
+        if (rcp85 === 'yes' && rcp26 === 'yes') marker._rcpCategory = 'high';
+        else if (rcp85 === 'yes')                marker._rcpCategory = 'medium';
+        else                                     marker._rcpCategory = 'low';
 
         marker.bindTooltip(this.buildTooltipHTML(lagoon), {
             className: 'custom-tooltip',

@@ -2989,7 +2989,6 @@ body.sidebar-collapsed .rail-btn:hover {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: #111;
     border: 3px solid #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.35);
     color: #fff;
@@ -2998,15 +2997,19 @@ body.sidebar-collapsed .rail-btn:hover {
     line-height: 1;
 }
 
+.cluster-icon > span {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
 .cluster-small  { width: 34px; height: 34px; font-size: 13px; }
-.cluster-medium { width: 42px; height: 42px; font-size: 14px; opacity: 0.92; }
-.cluster-large  { width: 52px; height: 52px; font-size: 15px; opacity: 0.85; }
+.cluster-medium { width: 42px; height: 42px; font-size: 14px; }
+.cluster-large  { width: 52px; height: 52px; font-size: 15px; }
 
 /* Marker Cluster Customization */
 .marker-cluster {
-    background: #111;
-    border: 3px solid var(--background-secondary);
-    box-shadow: var(--shadow-md);
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .marker-cluster div {
