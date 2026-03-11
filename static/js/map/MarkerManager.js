@@ -19,6 +19,12 @@ class MarkerManager {
     }
 
     init() {
+        const COLORS = {
+            high:   { fill: '#dc2626', ring: '#f87171' },
+            medium: { fill: '#f97316', ring: '#fdba74' },
+            low:    { fill: '#0d9488', ring: '#5eead4' }
+        };
+
         this.clusterGroup = L.markerClusterGroup({
             maxClusterRadius: 60,
             showCoverageOnHover: false,
@@ -31,32 +37,37 @@ class MarkerManager {
                 if (count >= 100) size = 'large';
                 else if (count >= 10) size = 'medium';
 
-                // Count RCP categories
-                let high = 0, medium = 0, low = 0;
+                let high = 0, med = 0, low = 0;
                 children.forEach(m => {
                     const cat = m._rcpCategory;
                     if (cat === 'high') high++;
-                    else if (cat === 'medium') medium++;
+                    else if (cat === 'medium') med++;
                     else low++;
                 });
 
-                // Build conic-gradient pie segments
-                const total = high + medium + low;
+                const total = high + med + low;
                 const pHigh = (high / total) * 360;
-                const pMed  = (medium / total) * 360;
+                const pMed  = (med / total) * 360;
 
-                let bg;
-                if (high === total)       bg = '#dc2626';
-                else if (medium === total) bg = '#f97316';
-                else if (low === total)    bg = '#0d9488';
-                else {
+                let fillBg, ringBg;
+                if (high === total) {
+                    fillBg = COLORS.high.fill;
+                    ringBg = COLORS.high.ring;
+                } else if (med === total) {
+                    fillBg = COLORS.medium.fill;
+                    ringBg = COLORS.medium.ring;
+                } else if (low === total) {
+                    fillBg = COLORS.low.fill;
+                    ringBg = COLORS.low.ring;
+                } else {
                     const s1 = pHigh;
                     const s2 = s1 + pMed;
-                    bg = `conic-gradient(#dc2626 0deg ${s1}deg, #f97316 ${s1}deg ${s2}deg, #0d9488 ${s2}deg 360deg)`;
+                    fillBg = `conic-gradient(${COLORS.high.fill} 0deg ${s1}deg, ${COLORS.medium.fill} ${s1}deg ${s2}deg, ${COLORS.low.fill} ${s2}deg 360deg)`;
+                    ringBg = `conic-gradient(${COLORS.high.ring} 0deg ${s1}deg, ${COLORS.medium.ring} ${s1}deg ${s2}deg, ${COLORS.low.ring} ${s2}deg 360deg)`;
                 }
 
                 return L.divIcon({
-                    html: `<div class="cluster-icon cluster-${size}" style="background:${bg}"><span>${count}</span></div>`,
+                    html: `<div class="cluster-icon cluster-${size}" style="background:${ringBg}"><div class="cluster-inner" style="background:${fillBg}"><span>${count}</span></div></div>`,
                     className: '',
                     iconSize: L.point(40, 40)
                 });
@@ -64,7 +75,6 @@ class MarkerManager {
         });
         this.map.addLayer(this.clusterGroup);
 
-        // Load polygon geometries once so hover previews are instant
         this._loadGeometries();
 
         if (window.DEBUG_MODE) console.log('✅ MarkerManager: Initialized');
@@ -89,10 +99,10 @@ class MarkerManager {
         const rcp85 = lagoon.rcp8_5_inundated?.toLowerCase();
         const rcp26 = lagoon.rcp2_6_inundated?.toLowerCase();
         let fill = '#0d9488';
-        let border = '#99f6e4';
+        let border = '#5eead4';
         if (rcp85 === 'yes') {
-            if (rcp26 === 'yes') { fill = '#dc2626'; border = '#fecaca'; }
-            else                 { fill = '#f97316'; border = '#fed7aa'; }
+            if (rcp26 === 'yes') { fill = '#dc2626'; border = '#f87171'; }
+            else                 { fill = '#f97316'; border = '#fdba74'; }
         }
 
         const icon = L.divIcon({
