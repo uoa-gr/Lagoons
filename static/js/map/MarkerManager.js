@@ -56,9 +56,18 @@ class MarkerManager {
     }
 
     createMarker(lagoon) {
+        const rcp85 = lagoon.rcp8_5_inundated?.toLowerCase();
+        const rcp26 = lagoon.rcp2_6_inundated?.toLowerCase();
+        let fill = '#0d9488';
+        let border = '#99f6e4';
+        if (rcp85 === 'yes') {
+            if (rcp26 === 'yes') { fill = '#dc2626'; border = '#fecaca'; }
+            else                 { fill = '#f97316'; border = '#fed7aa'; }
+        }
+
         const icon = L.divIcon({
             className: '',
-            html: '<div class="lagoon-marker"></div>',
+            html: `<div class="lagoon-marker" style="background:${fill};border-color:${border}"></div>`,
             iconSize: [18, 18],
             iconAnchor: [9, 9]
         });

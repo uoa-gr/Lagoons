@@ -43,8 +43,16 @@ class StatusBar {
             <div class="status-bar-left-col">
                 <div class="status-bar-legend">
                     <div class="legend-row">
-                        <span class="legend-dot lagoon"></span>
-                        <span class="legend-text">Lagoon</span>
+                        <span class="legend-dot high"></span>
+                        <span class="legend-text">RCP 2.6 &amp; 8.5</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot medium"></span>
+                        <span class="legend-text">RCP 8.5 only</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot low"></span>
+                        <span class="legend-text">Not inundated</span>
                     </div>
                 </div>
                 <div class="status-bar-left">

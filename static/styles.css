@@ -1136,10 +1136,19 @@ body.sidebar-collapsed .rail-btn:hover {
     flex-shrink: 0;
 }
 
-.legend-dot.lagoon {
-    background: #111;
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+.legend-dot.high {
+    background: #dc2626;
+    border: 1.5px solid #fecaca;
+}
+
+.legend-dot.medium {
+    background: #f97316;
+    border: 1.5px solid #fed7aa;
+}
+
+.legend-dot.low {
+    background: #0d9488;
+    border: 1.5px solid #99f6e4;
 }
 
 .legend-text {
@@ -2963,7 +2972,6 @@ body.sidebar-collapsed .rail-btn:hover {
 .lagoon-marker {
     width: 14px;
     height: 14px;
-    background: #111;
     border: 2.5px solid #fff;
     border-radius: 50%;
     box-shadow: 0 1px 4px rgba(0,0,0,0.35);
@@ -2971,7 +2979,6 @@ body.sidebar-collapsed .rail-btn:hover {
 }
 
 .lagoon-marker:hover {
-    background: #111;
     transform: scale(1.35);
     box-shadow: 0 2px 8px rgba(0,0,0,0.45);
 }
