@@ -17,6 +17,7 @@ class MarkerManager {
         this.activeTooltipRequests = new Map();
         this.tooltipCloseTimers = new Map();
         this.geometryCache = new Map();
+        this.geometryPending = new Map();
     }
 
     init() {
@@ -74,9 +75,6 @@ class MarkerManager {
         });
         const marker = L.marker([lagoon.centroid_lat, lagoon.centroid_lng], { icon });
 
-        // Pre-fetch geometry so hover preview is instant
-        this._prefetchGeometry(lagoon);
-
         marker.bindTooltip(this.buildTooltipHTML(lagoon), {
             className: 'custom-tooltip',
             direction: 'top',
@@ -103,11 +101,11 @@ class MarkerManager {
             this.destroyTooltipPreview(e.tooltip);
         });
 
-        marker.on('click', () => {
-            const cached = this.geometryCache.get(lagoon.id);
+        marker.on('click', async () => {
+            const geometry = await this._fetchGeometry(lagoon.id);
             this.eventBus.emit('marker:clicked', {
                 lagoonId: lagoon.id,
-                previewGeojson: cached?.geojson || null,
+                previewGeojson: geometry?.geojson || null,
                 centroidLat: lagoon.centroid_lat,
                 centroidLng: lagoon.centroid_lng
             });
@@ -146,15 +144,11 @@ class MarkerManager {
         const requestId = `${lagoon.id}:${Date.now()}`;
         this.activeTooltipRequests.set(lagoon.id, requestId);
 
-        // Wait for geometry if not cached yet
-        if (!this.geometryCache.has(lagoon.id)) {
-            await this._prefetchGeometry(lagoon);
-        }
+        const geometry = await this._fetchGeometry(lagoon.id);
 
         if (this.activeTooltipRequests.get(lagoon.id) !== requestId) return;
         if (!document.body.contains(previewContainer)) return;
 
-        const geometry = this.geometryCache.get(lagoon.id);
         const previewData = {
             id: lagoon.id,
             geojson: geometry?.geojson || null,
@@ -171,17 +165,28 @@ class MarkerManager {
         if (previewContainer) this.previewMap.destroy(previewContainer);
     }
 
-    async _prefetchGeometry(lagoon) {
-        if (this.geometryCache.has(lagoon.id)) return;
-        if (!this.dataManager?.fetchLagoonGeometryById) return;
-        try {
-            const geometry = await this.dataManager.fetchLagoonGeometryById(lagoon.id);
-            if (geometry) this.geometryCache.set(lagoon.id, geometry);
-        } catch (error) {
-            if (window.DEBUG_MODE) {
-                console.warn(`MarkerManager: Geometry prefetch failed for lagoon ${lagoon.id}`, error);
-            }
-        }
+    async _fetchGeometry(lagoonId) {
+        if (this.geometryCache.has(lagoonId)) return this.geometryCache.get(lagoonId);
+        if (this.geometryPending.has(lagoonId)) return this.geometryPending.get(lagoonId);
+
+        if (!this.dataManager?.fetchLagoonGeometryById) return null;
+
+        const promise = this.dataManager.fetchLagoonGeometryById(lagoonId)
+            .then(geometry => {
+                if (geometry) this.geometryCache.set(lagoonId, geometry);
+                this.geometryPending.delete(lagoonId);
+                return geometry || null;
+            })
+            .catch(error => {
+                this.geometryPending.delete(lagoonId);
+                if (window.DEBUG_MODE) {
+                    console.warn(`MarkerManager: Geometry fetch failed for lagoon ${lagoonId}`, error);
+                }
+                return null;
+            });
+
+        this.geometryPending.set(lagoonId, promise);
+        return promise;
     }
 
     _bindTooltipHover(marker) {
@@ -210,6 +215,7 @@ class MarkerManager {
         this.markers = [];
         this.activeTooltipRequests.clear();
         this.geometryCache.clear();
+        this.geometryPending.clear();
     }
 }
 
