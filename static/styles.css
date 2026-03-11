@@ -2993,7 +2993,8 @@ body.sidebar-collapsed .rail-btn:hover {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid;
+    background: #000;
+    border: 2px solid #aaa;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     color: #fff;
     font-family: 'Inter', sans-serif;
@@ -3001,25 +3002,27 @@ body.sidebar-collapsed .rail-btn:hover {
     font-size: 14px;
     line-height: 1;
     position: relative;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .cluster-badge {
     position: absolute;
-    right: -5px;
-    bottom: -5px;
-    background: #d60000;
+    bottom: -6px;
     color: #fff;
-    border: 1px solid #fff;
+    border: 1.5px solid #fff;
     border-radius: 10px;
     min-width: 16px;
     height: 16px;
     font-size: 10px;
-    line-height: 14px;
+    font-weight: 600;
+    line-height: 13px;
     text-align: center;
     padding: 0 3px;
-    text-shadow: none;
+    font-family: 'Inter', sans-serif;
 }
+
+.badge-high   { background: #dc2626; right: -6px; }
+.badge-medium { background: #f97316; right: 50%; transform: translateX(50%); }
+.badge-low    { background: #0d9488; left: -6px; }
 
 /* Marker Cluster Customization */
 .marker-cluster {

@@ -28,27 +28,22 @@ class MarkerManager {
                 const children = cluster.getAllChildMarkers();
                 const count = children.length;
 
-                let highCount = 0;
-                let hasHigh = false, hasMed = false;
+                let high = 0, med = 0, low = 0;
                 children.forEach(m => {
                     const cat = m._rcpCategory;
-                    if (cat === 'high') { highCount++; hasHigh = true; }
-                    else if (cat === 'medium') hasMed = true;
+                    if (cat === 'high') high++;
+                    else if (cat === 'medium') med++;
+                    else low++;
                 });
 
-                // Main circle color: highest risk present in cluster
-                let bg, border;
-                if (hasHigh)     { bg = '#dc2626'; border = '#f87171'; }
-                else if (hasMed) { bg = '#f97316'; border = '#fdba74'; }
-                else             { bg = '#0d9488'; border = '#5eead4'; }
-
                 const sz = count >= 100 ? 44 : count >= 10 ? 40 : 36;
-                const badge = highCount > 0
-                    ? `<span class="cluster-badge">${highCount}</span>`
-                    : '';
+                const badges = [];
+                if (high) badges.push(`<span class="cluster-badge badge-high">${high}</span>`);
+                if (med)  badges.push(`<span class="cluster-badge badge-medium">${med}</span>`);
+                if (low)  badges.push(`<span class="cluster-badge badge-low">${low}</span>`);
 
                 return L.divIcon({
-                    html: `<div class="cluster-icon" style="background:${bg};border-color:${border};width:${sz}px;height:${sz}px;">${count}${badge}</div>`,
+                    html: `<div class="cluster-icon" style="width:${sz}px;height:${sz}px;">${count}${badges.join('')}</div>`,
                     className: 'minimal-cluster',
                     iconSize: L.point(sz, sz),
                     iconAnchor: L.point(sz / 2, sz / 2)
