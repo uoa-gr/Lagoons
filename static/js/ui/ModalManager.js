@@ -133,10 +133,10 @@ class ModalManager {
             { label: 'Length',             value: lagoon.length_m  != null ? `${parseFloat(lagoon.length_m).toFixed(1)} m` : null },
             { label: 'Width',              value: lagoon.width_m   != null ? `${parseFloat(lagoon.width_m).toFixed(1)} m` : null },
             { label: 'Height',             value: lagoon.height_m  != null ? `${parseFloat(lagoon.height_m).toFixed(1)} m` : null },
-            { label: 'RCP 2.6 SLR',        value: lagoon.rcp2_6_slr != null ? `${lagoon.rcp2_6_slr} m` : null },
-            { label: 'RCP 8.5 SLR',        value: lagoon.rcp8_5_slr != null ? `${lagoon.rcp8_5_slr} m` : null },
-            { label: 'RCP 2.6 Inundated',  value: lagoon.rcp2_6_inundated, badge: true },
-            { label: 'RCP 8.5 Inundated',  value: lagoon.rcp8_5_inundated, badge: true },
+            { label: 'SSP1-2.6 SLR',       value: lagoon.rcp2_6_slr != null ? `${lagoon.rcp2_6_slr} m` : null },
+            { label: 'SSP5-8.5 SLR',       value: lagoon.rcp8_5_slr != null ? `${lagoon.rcp8_5_slr} m` : null },
+            { label: 'SSP1-2.6 Inundated', value: lagoon.rcp2_6_inundated, badge: true },
+            { label: 'SSP5-8.5 Inundated', value: lagoon.rcp8_5_inundated, badge: true },
             { label: 'Data Quality',       value: lagoon.data_quality }
         ];
 

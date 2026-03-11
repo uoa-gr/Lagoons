@@ -44,11 +44,11 @@ class StatusBar {
                 <div class="status-bar-legend">
                     <div class="legend-row">
                         <span class="legend-dot high"></span>
-                        <span class="legend-text">RCP 2.6 &amp; 8.5</span>
+                        <span class="legend-text">SSP1-2.6 &amp; SSP5-8.5</span>
                     </div>
                     <div class="legend-row">
                         <span class="legend-dot medium"></span>
-                        <span class="legend-text">RCP 8.5 only</span>
+                        <span class="legend-text">SSP5-8.5 only</span>
                     </div>
                     <div class="legend-row">
                         <span class="legend-dot low"></span>

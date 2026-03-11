@@ -137,8 +137,8 @@ class PolygonManager {
                     <div class="lagoon-hover-row"><span class="lagoon-hover-label">Location</span><span class="lagoon-hover-value">${escapeHtml(properties.location_en || '-')}</span></div>
                     <div class="lagoon-hover-row"><span class="lagoon-hover-label">Island</span><span class="lagoon-hover-value">${escapeHtml(properties.island_en || '-')}</span></div>
                     <div class="lagoon-hover-row"><span class="lagoon-hover-label">Area</span><span class="lagoon-hover-value">${escapeHtml(area)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">RCP 2.6</span><span class="lagoon-hover-value">${escapeHtml(rcp26)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">RCP 8.5</span><span class="lagoon-hover-value">${escapeHtml(rcp85)}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP1-2.6</span><span class="lagoon-hover-value">${escapeHtml(rcp26)}</span></div>
+                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP5-8.5</span><span class="lagoon-hover-value">${escapeHtml(rcp85)}</span></div>
                 </div>
             </div>
         `;

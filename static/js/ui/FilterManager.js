@@ -1,6 +1,6 @@
 /**
  * FilterManager - Modal-based filter UI for Greek Lagoons
- * Filters: Name / Location / Island / RCP 2.6 Inundated / RCP 8.5 Inundated
+ * Filters: Name / Location / Island / SSP1-2.6 Inundated / SSP5-8.5 Inundated
  */
 
 import { escapeHtml, debounce } from '../utils/helpers.js';
@@ -40,13 +40,13 @@ class FilterManager {
                 searchable: true
             },
             rcp2_6_inundated: {
-                label: 'RCP 2.6 Inundated',
+                label: 'SSP1-2.6 Inundated',
                 optionsKey: 'rcp2_6_values',
                 defaultText: 'All',
                 searchable: false
             },
             rcp8_5_inundated: {
-                label: 'RCP 8.5 Inundated',
+                label: 'SSP5-8.5 Inundated',
                 optionsKey: 'rcp8_5_values',
                 defaultText: 'All',
                 searchable: false
@@ -488,8 +488,8 @@ class FilterManager {
             name: 'Name',
             location: 'Location',
             island: 'Island',
-            rcp2_6_inundated: 'RCP 2.6',
-            rcp8_5_inundated: 'RCP 8.5'
+            rcp2_6_inundated: 'SSP1-2.6',
+            rcp8_5_inundated: 'SSP5-8.5'
         };
 
         const activeCount = Object.keys(filters).length;
@@ -545,8 +545,8 @@ class FilterManager {
                 if (filters.name) filterNames.push('Name');
                 if (filters.location) filterNames.push('Location');
                 if (filters.island) filterNames.push('Island');
-                if (filters.rcp2_6_inundated) filterNames.push('RCP 2.6');
-                if (filters.rcp8_5_inundated) filterNames.push('RCP 8.5');
+                if (filters.rcp2_6_inundated) filterNames.push('SSP1-2.6');
+                if (filters.rcp8_5_inundated) filterNames.push('SSP5-8.5');
                 toggleBtn.textContent = `Filters: ${filterNames.join(', ')}`;
             }
         } else {

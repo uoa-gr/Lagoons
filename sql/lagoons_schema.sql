@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS public.lagoons (
     area_km2         DOUBLE PRECISION,   -- area (km²)
 
     -- Sea-level rise projections (m)
-    rcp2_6_slr       DOUBLE PRECISION,   -- SLR under RCP 2.6
-    rcp8_5_slr       DOUBLE PRECISION,   -- SLR under RCP 8.5
-    rcp2_6_vec_slr   DOUBLE PRECISION,   -- Vector SLR under RCP 2.6
-    rcp8_5_vec_slr   DOUBLE PRECISION,   -- Vector SLR under RCP 8.5
+    rcp2_6_slr       DOUBLE PRECISION,   -- SLR under SSP1-2.6
+    rcp8_5_slr       DOUBLE PRECISION,   -- SLR under SSP5-8.5
+    rcp2_6_vec_slr   DOUBLE PRECISION,   -- SLR under SSP1-2.6 (with VLM)
+    rcp8_5_vec_slr   DOUBLE PRECISION,   -- SLR under SSP5-8.5 (with VLM)
 
     -- Inundation flags  (stored as text "yes"/"no")
     rcp2_6_inundated TEXT,   -- "yes" / "no"
