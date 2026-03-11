@@ -14,10 +14,8 @@ class MarkerManager {
         this.clusterGroup = null;
         this.markers = [];
         this.previewMap = new LagoonPreviewMap();
-        this.activeTooltipRequests = new Map();
         this.tooltipCloseTimers = new Map();
         this.geometryCache = new Map();
-        this.geometryPending = new Map();
     }
 
     init() {
@@ -39,6 +37,10 @@ class MarkerManager {
             }
         });
         this.map.addLayer(this.clusterGroup);
+
+        // Load polygon geometries once so hover previews are instant
+        this._loadGeometries();
+
         if (window.DEBUG_MODE) console.log('✅ MarkerManager: Initialized');
     }
 
@@ -91,21 +93,19 @@ class MarkerManager {
             this._scheduleClose(marker, 320);
         });
 
-        marker.on('tooltipopen', async e => {
+        marker.on('tooltipopen', e => {
             this._bindTooltipHover(marker);
-            await this.renderTooltipPreview(e.tooltip, lagoon);
+            this.renderTooltipPreview(e.tooltip, lagoon);
         });
 
         marker.on('tooltipclose', e => {
-            this.activeTooltipRequests.delete(lagoon.id);
             this.destroyTooltipPreview(e.tooltip);
         });
 
-        marker.on('click', async () => {
-            const geometry = await this._fetchGeometry(lagoon.id);
+        marker.on('click', () => {
             this.eventBus.emit('marker:clicked', {
                 lagoonId: lagoon.id,
-                previewGeojson: geometry?.geojson || null,
+                previewGeojson: this.geometryCache.get(lagoon.id) || null,
                 centroidLat: lagoon.centroid_lat,
                 centroidLng: lagoon.centroid_lng
             });
@@ -136,28 +136,16 @@ class MarkerManager {
         `;
     }
 
-    async renderTooltipPreview(tooltip, lagoon) {
+    renderTooltipPreview(tooltip, lagoon) {
         const tooltipEl = tooltip?.getElement?.();
         const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
         if (!previewContainer) return;
 
-        // First pass: render with centroid immediately (same as polygon hover fallback)
         this.previewMap.render(previewContainer, {
             id: lagoon.id,
+            geojson: this.geometryCache.get(lagoon.id) || null,
             centroid_lat: lagoon.centroid_lat,
             centroid_lng: lagoon.centroid_lng
-        });
-
-        // Second pass: fetch geometry and re-render with polygon
-        const geometry = await this._fetchGeometry(lagoon.id);
-        if (!geometry?.geojson) return;
-        if (!document.body.contains(previewContainer)) return;
-
-        this.previewMap.render(previewContainer, {
-            id: lagoon.id,
-            geojson: geometry.geojson,
-            centroid_lat: geometry.centroid_lat ?? lagoon.centroid_lat,
-            centroid_lng: geometry.centroid_lng ?? lagoon.centroid_lng
         });
     }
 
@@ -167,28 +155,18 @@ class MarkerManager {
         if (previewContainer) this.previewMap.destroy(previewContainer);
     }
 
-    async _fetchGeometry(lagoonId) {
-        if (this.geometryCache.has(lagoonId)) return this.geometryCache.get(lagoonId);
-        if (this.geometryPending.has(lagoonId)) return this.geometryPending.get(lagoonId);
-
-        if (!this.dataManager?.fetchLagoonGeometryById) return null;
-
-        const promise = this.dataManager.fetchLagoonGeometryById(lagoonId)
-            .then(geometry => {
-                if (geometry) this.geometryCache.set(lagoonId, geometry);
-                this.geometryPending.delete(lagoonId);
-                return geometry || null;
-            })
-            .catch(error => {
-                this.geometryPending.delete(lagoonId);
-                if (window.DEBUG_MODE) {
-                    console.warn(`MarkerManager: Geometry fetch failed for lagoon ${lagoonId}`, error);
-                }
-                return null;
-            });
-
-        this.geometryPending.set(lagoonId, promise);
-        return promise;
+    async _loadGeometries() {
+        if (!this.dataManager?.fetchPolygonData) return;
+        try {
+            const polygonData = await this.dataManager.fetchPolygonData({});
+            if (polygonData) {
+                polygonData.forEach(r => {
+                    if (r.geojson) this.geometryCache.set(r.id, r.geojson);
+                });
+            }
+        } catch (e) {
+            if (window.DEBUG_MODE) console.warn('MarkerManager: Failed to load geometries', e);
+        }
     }
 
     _bindTooltipHover(marker) {
@@ -215,9 +193,6 @@ class MarkerManager {
     clearMarkers() {
         this.clusterGroup?.clearLayers();
         this.markers = [];
-        this.activeTooltipRequests.clear();
-        this.geometryCache.clear();
-        this.geometryPending.clear();
     }
 }
 
