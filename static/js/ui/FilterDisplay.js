@@ -20,17 +20,21 @@ class FilterDisplay {
             location:         'Location',
             island:           'Island',
             rcp2_6_inundated: 'SSP1-2.6',
-            rcp8_5_inundated: 'SSP5-8.5'
+            rcp8_5_inundated: 'SSP5-8.5',
+            rcp2_6_vec_inundated: 'SSP1-2.6 (VLM)',
+            rcp8_5_vec_inundated: 'SSP5-8.5 (VLM)'
         };
 
         this.queryBuilderFields = [
             { value: 'name_en',          label: 'Name',         type: 'text'   },
             { value: 'location_en',      label: 'Location',     type: 'text'   },
             { value: 'island_en',        label: 'Island',       type: 'text'   },
-            { value: 'area_km2',         label: 'Area (km²)',   type: 'number' },
-            { value: 'height_m',         label: 'Height (m)',   type: 'number' },
-            { value: 'rcp2_6_inundated', label: 'SSP1-2.6',    type: 'text'   },
-            { value: 'rcp8_5_inundated', label: 'SSP5-8.5',    type: 'text'   }
+            { value: 'area_km2',         label: 'Area (km²)',                  type: 'number' },
+            { value: 'height_m',         label: 'Sandspit Max Height (m)',     type: 'number' },
+            { value: 'rcp2_6_inundated', label: 'SSP1-2.6 Inundated',         type: 'text'   },
+            { value: 'rcp8_5_inundated', label: 'SSP5-8.5 Inundated',         type: 'text'   },
+            { value: 'rcp2_6_vec_inundated', label: 'SSP1-2.6 Inundated (VLM)', type: 'text' },
+            { value: 'rcp8_5_vec_inundated', label: 'SSP5-8.5 Inundated (VLM)', type: 'text' }
         ];
 
         this.queryBuilderOperators = {

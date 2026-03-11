@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS public.lagoons (
     -- Morphometrics  (original units from shapefile)
     length_m         DOUBLE PRECISION,   -- max length (m)
     width_m          DOUBLE PRECISION,   -- max width (m)
-    height_m         DOUBLE PRECISION,   -- max height above MSL (m)
-    perimeter_km2    DOUBLE PRECISION,   -- perimeter (km²)
+    height_m         DOUBLE PRECISION,   -- sandspit max height above MSL (m)
+    perimeter_km2    DOUBLE PRECISION,   -- perimeter (km)
     area_km2         DOUBLE PRECISION,   -- area (km²)
 
     -- Sea-level rise projections (m)
