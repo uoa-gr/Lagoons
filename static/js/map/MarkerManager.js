@@ -15,6 +15,7 @@ class MarkerManager {
         this.markers = [];
         this.previewMap = new LagoonPreviewMap();
         this.activeTooltipRequests = new Map();
+        this.tooltipCloseTimers = new Map();
     }
 
     init() {
@@ -66,10 +67,21 @@ class MarkerManager {
         marker.bindTooltip(this.buildTooltipHTML(lagoon), {
             className: 'custom-tooltip',
             direction: 'top',
-            offset: [0, -10]
+            offset: [0, -14],
+            interactive: true
+        });
+
+        marker.on('mouseover', () => {
+            this._clearCloseTimer(marker);
+            if (!marker.isTooltipOpen()) marker.openTooltip();
+        });
+
+        marker.on('mouseout', () => {
+            this._scheduleClose(marker, 320);
         });
 
         marker.on('tooltipopen', async e => {
+            this._bindTooltipHover(marker);
             await this.renderTooltipPreview(e.tooltip, lagoon);
         });
 
@@ -143,6 +155,25 @@ class MarkerManager {
         const tooltipEl = tooltip?.getElement?.();
         const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
         if (previewContainer) this.previewMap.destroy(previewContainer);
+    }
+
+    _bindTooltipHover(marker) {
+        const tooltipEl = marker?.getTooltip?.()?.getElement?.();
+        if (!tooltipEl || tooltipEl.dataset.hoverBound === '1') return;
+        tooltipEl.dataset.hoverBound = '1';
+        tooltipEl.addEventListener('mouseenter', () => this._clearCloseTimer(marker));
+        tooltipEl.addEventListener('mouseleave', () => this._scheduleClose(marker, 180));
+    }
+
+    _scheduleClose(marker, delay) {
+        this._clearCloseTimer(marker);
+        const id = setTimeout(() => { marker.closeTooltip(); this.tooltipCloseTimers.delete(marker); }, delay);
+        this.tooltipCloseTimers.set(marker, id);
+    }
+
+    _clearCloseTimer(marker) {
+        const id = this.tooltipCloseTimers.get(marker);
+        if (id) { clearTimeout(id); this.tooltipCloseTimers.delete(marker); }
     }
 
     getMarkers()  { return this.markers; }
