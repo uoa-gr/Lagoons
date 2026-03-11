@@ -141,22 +141,24 @@ class MarkerManager {
         const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
         if (!previewContainer) return;
 
-        const requestId = `${lagoon.id}:${Date.now()}`;
-        this.activeTooltipRequests.set(lagoon.id, requestId);
+        // First pass: render with centroid immediately (same as polygon hover fallback)
+        this.previewMap.render(previewContainer, {
+            id: lagoon.id,
+            centroid_lat: lagoon.centroid_lat,
+            centroid_lng: lagoon.centroid_lng
+        });
 
+        // Second pass: fetch geometry and re-render with polygon
         const geometry = await this._fetchGeometry(lagoon.id);
-
-        if (this.activeTooltipRequests.get(lagoon.id) !== requestId) return;
+        if (!geometry?.geojson) return;
         if (!document.body.contains(previewContainer)) return;
 
-        const previewData = {
+        this.previewMap.render(previewContainer, {
             id: lagoon.id,
-            geojson: geometry?.geojson || null,
-            centroid_lat: geometry?.centroid_lat ?? lagoon.centroid_lat,
-            centroid_lng: geometry?.centroid_lng ?? lagoon.centroid_lng
-        };
-
-        this.previewMap.render(previewContainer, previewData);
+            geojson: geometry.geojson,
+            centroid_lat: geometry.centroid_lat ?? lagoon.centroid_lat,
+            centroid_lng: geometry.centroid_lng ?? lagoon.centroid_lng
+        });
     }
 
     destroyTooltipPreview(tooltip) {
