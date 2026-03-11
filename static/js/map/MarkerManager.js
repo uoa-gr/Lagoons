@@ -16,6 +16,7 @@ class MarkerManager {
         this.previewMap = new LagoonPreviewMap();
         this.activeTooltipRequests = new Map();
         this.tooltipCloseTimers = new Map();
+        this.geometryCache = new Map();
     }
 
     init() {
@@ -73,6 +74,9 @@ class MarkerManager {
         });
         const marker = L.marker([lagoon.centroid_lat, lagoon.centroid_lng], { icon });
 
+        // Pre-fetch geometry so hover preview is instant
+        this._prefetchGeometry(lagoon);
+
         marker.bindTooltip(this.buildTooltipHTML(lagoon), {
             className: 'custom-tooltip',
             direction: 'top',
@@ -99,11 +103,15 @@ class MarkerManager {
             this.destroyTooltipPreview(e.tooltip);
         });
 
-        marker.on('click', () => this.eventBus.emit('marker:clicked', {
-            lagoonId: lagoon.id,
-            centroidLat: lagoon.centroid_lat,
-            centroidLng: lagoon.centroid_lng
-        }));
+        marker.on('click', () => {
+            const cached = this.geometryCache.get(lagoon.id);
+            this.eventBus.emit('marker:clicked', {
+                lagoonId: lagoon.id,
+                previewGeojson: cached?.geojson || null,
+                centroidLat: lagoon.centroid_lat,
+                centroidLng: lagoon.centroid_lng
+            });
+        });
 
         return marker;
     }
@@ -138,25 +146,22 @@ class MarkerManager {
         const requestId = `${lagoon.id}:${Date.now()}`;
         this.activeTooltipRequests.set(lagoon.id, requestId);
 
-        let previewData = {
-            id: lagoon.id,
-            centroid_lat: lagoon.centroid_lat,
-            centroid_lng: lagoon.centroid_lng
-        };
-
-        if (this.dataManager?.fetchLagoonGeometryById) {
-            try {
-                const geometry = await this.dataManager.fetchLagoonGeometryById(lagoon.id);
-                if (this.activeTooltipRequests.get(lagoon.id) !== requestId) return;
-                if (geometry) previewData = { ...previewData, ...geometry };
-            } catch (error) {
-                if (window.DEBUG_MODE) {
-                    console.warn(`MarkerManager: Preview geometry unavailable for lagoon ${lagoon.id}`, error);
-                }
-            }
+        // Wait for geometry if not cached yet
+        if (!this.geometryCache.has(lagoon.id)) {
+            await this._prefetchGeometry(lagoon);
         }
 
+        if (this.activeTooltipRequests.get(lagoon.id) !== requestId) return;
         if (!document.body.contains(previewContainer)) return;
+
+        const geometry = this.geometryCache.get(lagoon.id);
+        const previewData = {
+            id: lagoon.id,
+            geojson: geometry?.geojson || null,
+            centroid_lat: geometry?.centroid_lat ?? lagoon.centroid_lat,
+            centroid_lng: geometry?.centroid_lng ?? lagoon.centroid_lng
+        };
+
         this.previewMap.render(previewContainer, previewData);
     }
 
@@ -164,6 +169,19 @@ class MarkerManager {
         const tooltipEl = tooltip?.getElement?.();
         const previewContainer = tooltipEl?.querySelector('[data-tooltip-preview-map]');
         if (previewContainer) this.previewMap.destroy(previewContainer);
+    }
+
+    async _prefetchGeometry(lagoon) {
+        if (this.geometryCache.has(lagoon.id)) return;
+        if (!this.dataManager?.fetchLagoonGeometryById) return;
+        try {
+            const geometry = await this.dataManager.fetchLagoonGeometryById(lagoon.id);
+            if (geometry) this.geometryCache.set(lagoon.id, geometry);
+        } catch (error) {
+            if (window.DEBUG_MODE) {
+                console.warn(`MarkerManager: Geometry prefetch failed for lagoon ${lagoon.id}`, error);
+            }
+        }
     }
 
     _bindTooltipHover(marker) {
@@ -191,6 +209,7 @@ class MarkerManager {
         this.clusterGroup?.clearLayers();
         this.markers = [];
         this.activeTooltipRequests.clear();
+        this.geometryCache.clear();
     }
 }
 
