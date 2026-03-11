@@ -3020,9 +3020,9 @@ body.sidebar-collapsed .rail-btn:hover {
     font-family: 'Inter', sans-serif;
 }
 
-.badge-high   { background: #dc2626; right: -6px; }
-.badge-medium { background: #f97316; right: 50%; transform: translateX(50%); }
-.badge-low    { background: #0d9488; left: -6px; }
+.badge-high   { background: #dc2626; right: -8px; bottom: 0px; }
+.badge-medium { background: #f97316; left: 50%; bottom: -7px; transform: translateX(-50%); }
+.badge-low    { background: #0d9488; left: -8px; bottom: 0px; }
 
 /* Marker Cluster Customization */
 .marker-cluster {
