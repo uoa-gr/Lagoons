@@ -88,7 +88,7 @@ class PolygonManager {
         const rcp26 = feature.properties?.rcp2_6_inundated?.toLowerCase();
         let fillColor = '#0d9488';
         if (rcp85 === 'yes') fillColor = rcp26 === 'yes' ? '#dc2626' : '#f97316';
-        return { color: '#1e3a5f', weight: 1.5, opacity: 0.8, fillColor, fillOpacity: 0.35 };
+        return { color: '#1e3a5f', weight: 2.5, opacity: 0.9, fillColor, fillOpacity: 0.4 };
     }
 
     _bindPolygonInteractions(feature, layer) {

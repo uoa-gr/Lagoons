@@ -6,8 +6,8 @@ import { safeJsonParse } from '../utils/helpers.js';
 
 const DEFAULT_CENTER = [39.0742, 21.8243];
 const DEFAULT_ZOOM = 7;
-const POINT_ZOOM = 13;
-const MAX_PREVIEW_ZOOM = 15;
+const POINT_ZOOM = 14;
+const MAX_PREVIEW_ZOOM = 17;
 
 class LagoonPreviewMap {
     constructor() {
@@ -45,9 +45,9 @@ class LagoonPreviewMap {
                 const polygon = L.geoJSON(polygonGeoJson, {
                     style: {
                         color: '#1e3a5f',
-                        weight: 2.5,
+                        weight: 3,
                         fillColor: '#1d4ed8',
-                        fillOpacity: 0.35
+                        fillOpacity: 0.4
                     }
                 }).addTo(map);
 
@@ -62,7 +62,7 @@ class LagoonPreviewMap {
         const lat = parseFloat(lagoon.centroid_lat ?? lagoon.centroidLat);
         const lng = parseFloat(lagoon.centroid_lng ?? lagoon.centroidLng);
 
-        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+        if (!Number.isNaN(lat) && !Number.isNaN(lng) && !bounds) {
             L.circleMarker([lat, lng], {
                 radius: 4,
                 color: '#ffffff',
@@ -114,10 +114,10 @@ class LagoonPreviewMap {
             if (pointBounds) {
                 map.setView(bounds.getCenter(), options.pointZoom || POINT_ZOOM);
             } else {
-                map.fitBounds(bounds.pad(0.15), {
+                map.fitBounds(bounds, {
                     animate: false,
                     maxZoom: options.maxZoom || MAX_PREVIEW_ZOOM,
-                    padding: [4, 4]
+                    padding: [6, 6]
                 });
             }
             return;
