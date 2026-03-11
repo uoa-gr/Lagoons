@@ -19,12 +19,6 @@ class MarkerManager {
     }
 
     init() {
-        const COLORS = {
-            high:   { fill: '#dc2626', ring: '#f87171' },
-            medium: { fill: '#f97316', ring: '#fdba74' },
-            low:    { fill: '#0d9488', ring: '#5eead4' }
-        };
-
         this.clusterGroup = L.markerClusterGroup({
             maxClusterRadius: 60,
             showCoverageOnHover: false,
@@ -33,43 +27,31 @@ class MarkerManager {
             iconCreateFunction(cluster) {
                 const children = cluster.getAllChildMarkers();
                 const count = children.length;
-                let size = 'small';
-                if (count >= 100) size = 'large';
-                else if (count >= 10) size = 'medium';
 
-                let high = 0, med = 0, low = 0;
+                let highCount = 0;
+                let hasHigh = false, hasMed = false;
                 children.forEach(m => {
                     const cat = m._rcpCategory;
-                    if (cat === 'high') high++;
-                    else if (cat === 'medium') med++;
-                    else low++;
+                    if (cat === 'high') { highCount++; hasHigh = true; }
+                    else if (cat === 'medium') hasMed = true;
                 });
 
-                const total = high + med + low;
-                const pHigh = (high / total) * 360;
-                const pMed  = (med / total) * 360;
+                // Main circle color: highest risk present in cluster
+                let bg, border;
+                if (hasHigh)     { bg = '#dc2626'; border = '#f87171'; }
+                else if (hasMed) { bg = '#f97316'; border = '#fdba74'; }
+                else             { bg = '#0d9488'; border = '#5eead4'; }
 
-                let fillBg, ringBg;
-                if (high === total) {
-                    fillBg = COLORS.high.fill;
-                    ringBg = COLORS.high.ring;
-                } else if (med === total) {
-                    fillBg = COLORS.medium.fill;
-                    ringBg = COLORS.medium.ring;
-                } else if (low === total) {
-                    fillBg = COLORS.low.fill;
-                    ringBg = COLORS.low.ring;
-                } else {
-                    const s1 = pHigh;
-                    const s2 = s1 + pMed;
-                    fillBg = `conic-gradient(${COLORS.high.fill} 0deg ${s1}deg, ${COLORS.medium.fill} ${s1}deg ${s2}deg, ${COLORS.low.fill} ${s2}deg 360deg)`;
-                    ringBg = `conic-gradient(${COLORS.high.ring} 0deg ${s1}deg, ${COLORS.medium.ring} ${s1}deg ${s2}deg, ${COLORS.low.ring} ${s2}deg 360deg)`;
-                }
+                const sz = count >= 100 ? 44 : count >= 10 ? 40 : 36;
+                const badge = highCount > 0
+                    ? `<span class="cluster-badge">${highCount}</span>`
+                    : '';
 
                 return L.divIcon({
-                    html: `<div class="cluster-icon cluster-${size}" style="background:${ringBg}"><div class="cluster-inner" style="background:${fillBg}"><span>${count}</span></div></div>`,
-                    className: '',
-                    iconSize: L.point(40, 40)
+                    html: `<div class="cluster-icon" style="background:${bg};border-color:${border};width:${sz}px;height:${sz}px;">${count}${badge}</div>`,
+                    className: 'minimal-cluster',
+                    iconSize: L.point(sz, sz),
+                    iconAnchor: L.point(sz / 2, sz / 2)
                 });
             }
         });

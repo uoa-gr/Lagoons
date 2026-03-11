@@ -2984,35 +2984,42 @@ body.sidebar-collapsed .rail-btn:hover {
 }
 
 /* Cluster icons */
+.minimal-cluster {
+    background: transparent !important;
+}
+
 .cluster-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    border: 2px solid;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     color: #fff;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
+    font-size: 14px;
     line-height: 1;
-    padding: 3px;
-}
-
-.cluster-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-}
-
-.cluster-inner > span {
+    position: relative;
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
-.cluster-small  { width: 34px; height: 34px; font-size: 13px; }
-.cluster-medium { width: 42px; height: 42px; font-size: 14px; }
-.cluster-large  { width: 52px; height: 52px; font-size: 15px; }
+.cluster-badge {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    background: #d60000;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+    line-height: 14px;
+    text-align: center;
+    padding: 0 3px;
+    text-shadow: none;
+}
 
 /* Marker Cluster Customization */
 .marker-cluster {
