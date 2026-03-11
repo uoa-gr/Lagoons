@@ -4650,11 +4650,14 @@ body.modal-open {
 
 /* ===== LAGOON HOVER CARD ===== */
 .leaflet-tooltip.custom-tooltip {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     padding: 0;
     pointer-events: auto;
+    overflow: hidden;
+    opacity: 1 !important;
 }
 
 .leaflet-tooltip.custom-tooltip .leaflet-tooltip-content {
@@ -4665,9 +4668,6 @@ body.modal-open {
 .lagoon-hover-card {
     width: min(310px, calc(100vw - 40px));
     background: #ffffff;
-    border: 1px solid #d0d0d0;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
     overflow: hidden;
 }
 
