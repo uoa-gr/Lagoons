@@ -59,7 +59,7 @@ class EmailHelper {
             `SSP1-2.6 SLR (VLM): ${d.rcp2_6_vec_slr || ''}`,
             `SSP5-8.5 SLR (VLM): ${d.rcp8_5_vec_slr || ''}`,
             `SSP1-2.6 Inundated (VLM): ${d.rcp2_6_vec_inundated || ''}`,
-            `SSP5-8.5 Inundated (VLM): ${d.rcp8_5_vec_inundated || ''}`,  
+            `SSP5-8.5 Inundated (VLM): ${d.rcp8_5_vec_inundated || ''}`,
             '',
             'Additional notes:',
             d.notes || '',
