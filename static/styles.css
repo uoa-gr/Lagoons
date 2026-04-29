@@ -3636,8 +3636,11 @@ body.sidebar-open {
     }
 
     .header h1 {
-        font-size: 1.1rem;
-        margin-bottom: 0.1rem;
+        /* Italianno is calligraphic — needs visible size to read at all.
+           Scale with viewport so it never collapses on narrow phones. */
+        font-size: clamp(2rem, 8vw, 2.6rem);
+        line-height: 0.9;
+        margin: 0;
     }
 
     .nav-icon {
@@ -3663,13 +3666,21 @@ body.sidebar-open {
         min-width: auto;
     }
 
-    /* Mobile controls visible */
+    /* Mobile controls visible — compact, not towering */
     .mobile-controls {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 0.5rem 1rem;
-        gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        gap: 0.4rem;
+    }
+    .mobile-toggle-btn {
+        padding: 0.4rem 0.75rem;
+        min-height: 32px;
+        min-width: 0;
+        font-size: 0.65rem;
+        letter-spacing: 0.04em;
+        flex: 0 1 auto;
     }
 
     /* Remove padding from main content on mobile */
