@@ -2,7 +2,7 @@
 static/config.js
 
 # Raw shapefile data — already uploaded to Supabase
-data/
+/data/
 
 # Python
 __pycache__/
@@ -20,3 +20,9 @@ Thumbs.db
 # Editor
 .vscode/settings.json
 *.swp
+
+# Local-only
+.claude/
+backups/
+# Source images are copied into static/assets/ for the dev server
+/assets/

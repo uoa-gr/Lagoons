@@ -105,26 +105,34 @@ CREATE OR REPLACE FUNCTION public.api_lagoons_markers(
     p_rcp8_5_inundated TEXT    DEFAULT NULL
 )
 RETURNS TABLE (
-    id               INTEGER,
-    name_en          TEXT,
-    location_en      TEXT,
-    island_en        TEXT,
-    area_km2         DOUBLE PRECISION,
-    height_m         DOUBLE PRECISION,
-    rcp2_6_inundated TEXT,
-    rcp8_5_inundated TEXT,
-    rcp2_6_slr       DOUBLE PRECISION,
-    rcp8_5_slr       DOUBLE PRECISION,
-    centroid_lat     DOUBLE PRECISION,
-    centroid_lng     DOUBLE PRECISION
+    id                   INTEGER,
+    name_en              TEXT,
+    location_en          TEXT,
+    island_en            TEXT,
+    length_m             DOUBLE PRECISION,
+    width_m              DOUBLE PRECISION,
+    height_m             DOUBLE PRECISION,
+    perimeter_km2        DOUBLE PRECISION,
+    area_km2             DOUBLE PRECISION,
+    rcp2_6_slr           DOUBLE PRECISION,
+    rcp8_5_slr           DOUBLE PRECISION,
+    rcp2_6_vec_slr       DOUBLE PRECISION,
+    rcp8_5_vec_slr       DOUBLE PRECISION,
+    rcp2_6_inundated     TEXT,
+    rcp8_5_inundated     TEXT,
+    rcp2_6_vec_inundated TEXT,
+    rcp8_5_vec_inundated TEXT,
+    centroid_lat         DOUBLE PRECISION,
+    centroid_lng         DOUBLE PRECISION
 )
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
     SELECT
         l.id, l.name_en, l.location_en, l.island_en,
-        l.area_km2, l.height_m,
+        l.length_m, l.width_m, l.height_m, l.perimeter_km2, l.area_km2,
+        l.rcp2_6_slr, l.rcp8_5_slr, l.rcp2_6_vec_slr, l.rcp8_5_vec_slr,
         l.rcp2_6_inundated, l.rcp8_5_inundated,
-        l.rcp2_6_slr, l.rcp8_5_slr,
+        l.rcp2_6_vec_inundated, l.rcp8_5_vec_inundated,
         l.centroid_lat, l.centroid_lng
     FROM public.lagoons l
     WHERE

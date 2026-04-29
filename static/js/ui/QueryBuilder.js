@@ -16,15 +16,29 @@ class QueryBuilder {
         this.filterOptions = {};
 
         this.fields = [
-            { value: 'name_en',          label: 'Name',       type: 'text'   },
-            { value: 'location_en',      label: 'Location',   type: 'text'   },
-            { value: 'island_en',        label: 'Island',     type: 'text'   },
-            { value: 'area_km2',         label: 'Area (km²)',                  type: 'number' },
-            { value: 'height_m',         label: 'Sandspit Max Height (m)',     type: 'number' },
-            { value: 'rcp2_6_inundated', label: 'SSP1-2.6 Inundated',         type: 'text'   },
-            { value: 'rcp8_5_inundated', label: 'SSP5-8.5 Inundated',         type: 'text'   },
-            { value: 'rcp2_6_vec_inundated', label: 'SSP1-2.6 Inundated (VLM)', type: 'text' },
-            { value: 'rcp8_5_vec_inundated', label: 'SSP5-8.5 Inundated (VLM)', type: 'text' }
+            // Identification & geography
+            { value: 'name_en',     label: 'Name',                  type: 'text', group: 'Identification' },
+            { value: 'island_en',   label: 'Island',                type: 'text', group: 'Geography' },
+            { value: 'location_en', label: 'Location (Prefecture)', type: 'text', group: 'Geography' },
+
+            // Morphometry
+            { value: 'area_km2',      label: 'Area (km²)',                type: 'number', group: 'Morphometry' },
+            { value: 'perimeter_km2', label: 'Perimeter (km)',            type: 'number', group: 'Morphometry' },
+            { value: 'length_m',      label: 'Length (m)',                type: 'number', group: 'Morphometry' },
+            { value: 'width_m',       label: 'Width (m)',                 type: 'number', group: 'Morphometry' },
+            { value: 'height_m',      label: 'Sandspit Max Height (m)',   type: 'number', group: 'Morphometry' },
+
+            // SSP1-2.6
+            { value: 'rcp2_6_slr',           label: 'SLR geocentric (m)',         type: 'number', group: 'SSP1-2.6 (low emissions)' },
+            { value: 'rcp2_6_vec_slr',       label: 'SLR VLM-corrected (m)',      type: 'number', group: 'SSP1-2.6 (low emissions)' },
+            { value: 'rcp2_6_inundated',     label: 'Inundated (geocentric)',     type: 'text',   group: 'SSP1-2.6 (low emissions)' },
+            { value: 'rcp2_6_vec_inundated', label: 'Inundated (VLM-corrected)',  type: 'text',   group: 'SSP1-2.6 (low emissions)' },
+
+            // SSP5-8.5
+            { value: 'rcp8_5_slr',           label: 'SLR geocentric (m)',         type: 'number', group: 'SSP5-8.5 (high emissions)' },
+            { value: 'rcp8_5_vec_slr',       label: 'SLR VLM-corrected (m)',      type: 'number', group: 'SSP5-8.5 (high emissions)' },
+            { value: 'rcp8_5_inundated',     label: 'Inundated (geocentric)',     type: 'text',   group: 'SSP5-8.5 (high emissions)' },
+            { value: 'rcp8_5_vec_inundated', label: 'Inundated (VLM-corrected)',  type: 'text',   group: 'SSP5-8.5 (high emissions)' }
         ];
 
         this.operators = {
@@ -54,6 +68,24 @@ class QueryBuilder {
         this.initEventListeners();
         this.addCondition();
         if (window.DEBUG_MODE) console.log('✅ QueryBuilder: Initialized');
+    }
+
+    _renderFieldOptions(selected) {
+        const groups = new Map();
+        for (const f of this.fields) {
+            const g = f.group || 'Other';
+            if (!groups.has(g)) groups.set(g, []);
+            groups.get(g).push(f);
+        }
+        const opts = [];
+        for (const [g, items] of groups) {
+            opts.push(`<optgroup label="${escapeHtml(g)}">`);
+            for (const f of items) {
+                opts.push(`<option value="${f.value}" ${selected === f.value ? 'selected' : ''}>${escapeHtml(f.label)}</option>`);
+            }
+            opts.push(`</optgroup>`);
+        }
+        return opts.join('');
     }
 
     cacheElements() {
@@ -218,9 +250,7 @@ class QueryBuilder {
                 : '<div class="condition-logic"><span class="condition-where">WHERE</span></div>'}
             <div class="condition-field">
                 <select data-id="${condition.id}" data-prop="field">
-                    ${this.fields.map(f =>
-                        `<option value="${f.value}" ${condition.field === f.value ? 'selected' : ''}>${f.label}</option>`
-                    ).join('')}
+                    ${this._renderFieldOptions(condition.field)}
                 </select>
             </div>
             <div class="condition-operator">

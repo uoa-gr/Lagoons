@@ -19,7 +19,12 @@ class MapManager {
             center: [39.0742, 21.8243],
             zoom: 7,
             zoomControl: true,
-            attributionControl: true
+            attributionControl: true,
+            // Allow quarter-zoom steps so the scale fraction updates smoothly
+            // when scrolling, instead of jumping in big discrete bands.
+            zoomSnap: 0.25,
+            zoomDelta: 0.5,
+            wheelPxPerZoomLevel: 80
         });
 
         this._initBasemaps();
@@ -41,8 +46,8 @@ class MapManager {
             'CartoDB Positron': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 }),
             'CartoDB Dark':     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  { attribution: '© CartoDB', maxZoom: 19 })
         };
-        this.basemaps['ESRI Satellite'].addTo(this.map);
-        this.currentBasemap = 'ESRI Satellite';
+        this.basemaps['CartoDB Positron'].addTo(this.map);
+        this.currentBasemap = 'CartoDB Positron';
     }
 
     _initControls() {

@@ -27,7 +27,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&family=Sacramento&display=swap" rel="stylesheet">
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -41,38 +41,75 @@
 <body>
     <div id="app">
 
-        <!-- Welcome Modal -->
-        <div id="welcome-modal" class="modal welcome-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Welcome to Lagoons Web GIS</h3>
-                    <button class="modal-close" id="close-welcome" aria-label="Close welcome modal">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="welcome-intro">
-                        <p>Interactive map of Greek coastal lagoons and their vulnerability to sea-level rise under
-                            different climate scenarios.</p>
-                    </div>
-                    <div class="welcome-research">
-                        <div class="welcome-logo-row">
-                            <img src="ekpa-logo.webp" alt="NKUA logo" class="welcome-logo">
-                            <div>
-                                <p><strong>National and Kapodistrian University of Athens</strong></p>
-                                <p><a href="http://scholar.uoa.gr/evelpidou/home" target="_blank"
-                                        rel="noopener noreferrer">Prof. Niki Evelpidou</a> &amp; Research Team</p>
+        <!-- Welcome Modal — editorial poster -->
+        <div id="welcome-modal" class="modal welcome-modal wm">
+            <div class="modal-content wm-content">
+                <button class="wm-close" id="close-welcome" aria-label="Close welcome modal">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <article class="wm-poster">
+                    <!-- ── MASTHEAD ─────────────────────────────────────────────── -->
+                    <header class="wm-masthead">
+                        <div class="wm-eyebrow">A WebGIS · 2026</div>
+                        <h1 class="wm-title">
+                            Coastal lagoons<br>
+                            <em class="wm-title-italic">of Earth</em>
+                        </h1>
+                        <p class="wm-deck">
+                            A WebGIS of the world's coastal lagoons — their geomorphology,
+                            location, and projected vulnerability to sea-level rise under
+                            IPCC climate scenarios.
+                        </p>
+
+                        <div class="wm-coverage" role="group" aria-label="Coverage so far">
+                            <div class="wm-cov-block">
+                                <span class="wm-cov-label">Sites mapped</span>
+                                <span class="wm-cov-value">125</span>
+                            </div>
+                            <span class="wm-cov-divider" aria-hidden="true"></span>
+                            <div class="wm-cov-block">
+                                <span class="wm-cov-label">Regions covered</span>
+                                <span class="wm-cov-value-text">Greece</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="welcome-footer">
-                        <button id="enter-webgis" class="btn-welcome-enter">Enter Map</button>
-                    </div>
-                </div>
+                    </header>
+
+
+                    <!-- ── FOOTER ───────────────────────────────────────────────── -->
+                    <footer class="wm-foot">
+                        <div class="wm-cred">
+                            <div class="wm-cred-text">
+                                <span class="wm-cred-eyebrow">Research by</span>
+                                <p class="wm-cred-univ">
+                                    National and Kapodistrian<br>University of Athens
+                                </p>
+                                <p class="wm-cred-author">
+                                    <a href="http://scholar.uoa.gr/evelpidou/home" target="_blank"
+                                       rel="noopener noreferrer">Prof. Niki Evelpidou</a>
+                                    &amp; Research Team
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Signature — centered between research credit and CTA, same row -->
+                        <div class="wm-sig-tag">
+                            <span class="wm-sig-tag-eyebrow">Developed by</span>
+                            <a href="https://liaskos.eu" target="_blank" rel="noopener noreferrer"
+                               class="wm-signature wm-signature-sm"
+                               aria-label="Alexandros Liaskos">Alexandros Liaskos</a>
+                        </div>
+
+                        <button id="enter-webgis" class="wm-cta" type="button">
+                            Enter the app
+                            <span class="wm-cta-arrow" aria-hidden="true">→</span>
+                        </button>
+                    </footer>
+                </article>
             </div>
         </div>
 
@@ -101,6 +138,7 @@
         <div class="mobile-controls">
             <button id="mobile-filters-toggle" class="mobile-toggle-btn">Filters</button>
             <button id="mobile-search-toggle" class="mobile-toggle-btn">Search</button>
+            <button id="mobile-stats-toggle" class="mobile-toggle-btn">Statistics</button>
         </div>
 
         <!-- Main Content -->
@@ -138,6 +176,18 @@
                             </span>
                             <span class="tab-label">Search</span>
                         </button>
+                        <button class="tab-button" data-tab="statistics" title="Statistics" aria-label="Statistics">
+                            <span class="tab-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="square">
+                                    <line x1="3" y1="20" x2="21" y2="20"></line>
+                                    <rect x="5"  y="11" width="3" height="9"></rect>
+                                    <rect x="10" y="6"  width="3" height="14"></rect>
+                                    <rect x="15" y="14" width="3" height="6"></rect>
+                                </svg>
+                            </span>
+                            <span class="tab-label">Statistics</span>
+                        </button>
                     </div>
 
                     <!-- Filters Tab -->
@@ -147,111 +197,115 @@
                             <span>Loading filters…</span>
                         </div>
 
-                        <div id="filter-controls">
-                            <!-- Name Filter -->
-                            <div class="filter-group">
-                                <label>Name:</label>
-                                <button class="filter-selector" data-filter="name" id="name-filter-btn">
-                                    <span class="filter-selector-value">All Names</span>
-                                    <span class="filter-selector-badge" id="name-filter-badge"></span>
-                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
+                        <div id="fbc-panel" class="fbc-panel">
+                            <!-- Variable picker -->
+                            <button id="fbc-picker-btn" class="fbc-picker-btn" type="button"
+                                    aria-haspopup="dialog" aria-controls="fbc-variable-modal">
+                                <span class="fbc-picker-eyebrow">filter by</span>
+                                <span class="fbc-picker-row">
+                                    <span id="fbc-picker-value" class="fbc-picker-value">Area (km²)</span>
+                                    <svg class="fbc-picker-chev" width="16" height="16" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
-                                </button>
-                                <input type="hidden" id="name-filter" name="name" value="">
-                            </div>
-
-                            <!-- Location Filter -->
-                            <div class="filter-group">
-                                <label>Location:</label>
-                                <button class="filter-selector" data-filter="location" id="location-filter-btn">
-                                    <span class="filter-selector-value">All Locations</span>
-                                    <span class="filter-selector-badge" id="location-filter-badge"></span>
-                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </button>
-                                <input type="hidden" id="location-filter" name="location" value="">
-                            </div>
-
-                            <!-- Island Filter -->
-                            <div class="filter-group">
-                                <label>Island:</label>
-                                <button class="filter-selector" data-filter="island" id="island-filter-btn">
-                                    <span class="filter-selector-value">All Islands</span>
-                                    <span class="filter-selector-badge" id="island-filter-badge"></span>
-                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </button>
-                                <input type="hidden" id="island-filter" name="island" value="">
-                            </div>
-
-                            <!-- SSP1-2.6 Filter -->
-                            <div class="filter-group">
-                                <label>SSP1-2.6 Inundated:</label>
-                                <button class="filter-selector" data-filter="rcp2_6_inundated" id="rcp26-filter-btn">
-                                    <span class="filter-selector-value">All</span>
-                                    <span class="filter-selector-badge" id="rcp26-filter-badge"></span>
-                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </button>
-                                <input type="hidden" id="rcp26-filter" name="rcp2_6_inundated" value="">
-                            </div>
-
-                            <!-- SSP5-8.5 Filter -->
-                            <div class="filter-group">
-                                <label>SSP5-8.5 Inundated:</label>
-                                <button class="filter-selector" data-filter="rcp8_5_inundated" id="rcp85-filter-btn">
-                                    <span class="filter-selector-value">All</span>
-                                    <span class="filter-selector-badge" id="rcp85-filter-badge"></span>
-                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </button>
-                                <input type="hidden" id="rcp85-filter" name="rcp8_5_inundated" value="">
-                            </div>
-
-                            <!-- Active Filters Summary -->
-                            <div id="active-filters-summary" class="active-filters-summary hidden">
-                                <h4>Active Filters:</h4>
-                                <div id="active-filters-list" class="active-filters-list"></div>
-                            </div>
-
-                            <!-- Query Builder -->
-                            <button id="sql-filter-btn" class="btn-primary" style="width:100%;margin-top:1rem;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" style="margin-right:6px;vertical-align:middle;">
-                                    <polyline points="4 17 10 11 4 5"></polyline>
-                                    <line x1="12" y1="19" x2="20" y2="19"></line>
-                                </svg>
-                                SQL Query Filter
+                                </span>
                             </button>
 
-                            <button id="clear-filters" class="btn-secondary" style="width:100%;margin-top:0.5rem;">Clear
-                                All Filters</button>
+                            <!-- Variable content area: slider OR searchable list -->
+                            <div id="fbc-content" class="fbc-content" aria-live="polite"></div>
+
+                            <!-- Active filters register (compact pills + overflow popover) -->
+                            <section id="fbc-active-section" class="fbc-active-section hidden">
+                                <div id="fbc-active-list" class="fbc-active-list"></div>
+                            </section>
+
+                            <div class="fbc-actions">
+                                <button id="clear-filters" class="fbc-link fbc-link-secondary" type="button">
+                                    Reset all
+                                </button>
+                                <button id="sql-filter-btn" class="fbc-link" type="button">
+                                    Advanced query<span class="fbc-link-arrow" aria-hidden="true"> →</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div id="filter-error" class="filter-error hidden"></div>
+
+                        <!-- Compatibility: hidden inputs FilterManager reads/writes -->
+                        <input type="hidden" id="name-filter"     name="name"               value="">
+                        <input type="hidden" id="location-filter" name="location"           value="">
+                        <input type="hidden" id="island-filter"   name="island"             value="">
+                        <input type="hidden" id="rcp26-filter"    name="rcp2_6_inundated"   value="">
+                        <input type="hidden" id="rcp85-filter"    name="rcp8_5_inundated"   value="">
+
+                        <!-- Hidden host: NumericRangeFilters renders sliders here (offscreen) -->
+                        <div id="numeric-range-filters" data-empty-text="Loading…" hidden></div>
                     </div>
 
                     <!-- Search Tab -->
                     <div class="tab-content" id="search-tab">
+                        <p class="stats-hint stats-hint-top">
+                            Selecting a result applies it as a filter — affecting the map, statistics, and lagoon counts.
+                        </p>
                         <div class="search-panel">
                             <label for="global-search-input" class="search-label">Global Search</label>
                             <input id="global-search-input" type="text" class="search-input"
                                 placeholder="Search name, location, island…" autocomplete="off" />
                             <div id="global-search-results" class="search-results hidden" aria-live="polite"></div>
                             <div id="global-search-selected" class="search-selected hidden"></div>
-                            <div class="search-hint">
-                                Selecting a result applies the corresponding filter.
+                        </div>
+                    </div>
+
+                    <!-- Statistics Tab -->
+                    <div class="tab-content" id="statistics-tab">
+                        <div class="statistics-panel">
+                            <p class="stats-hint stats-hint-top">
+                                Filter changes apply to statistics; clear all filters to view the full dataset.
+                                Hover bars for exact counts; click a bar to list its lagoons.
+                            </p>
+
+                            <label class="search-label" for="stats-field-btn">Variable:</label>
+                            <div class="filter-group stats-field-group">
+                                <button class="filter-selector has-value" id="stats-field-btn" type="button"
+                                        aria-haspopup="dialog" aria-controls="stats-variable-modal">
+                                    <span class="filter-selector-value" id="stats-field-btn-value">Area (km²)</span>
+                                    <span class="stats-type-badge" id="stats-type-badge" aria-hidden="true">numeric</span>
+                                    <svg class="filter-selector-arrow" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
                             </div>
+
+                            <figure class="stats-figure">
+                                <figcaption class="stats-figcaption" id="stats-figure-caption">
+                                    <span class="stats-fig-num">Fig.</span>
+                                    <span id="stats-figure-title">Select a variable to begin.</span>
+                                </figcaption>
+                                <div class="stats-chart-wrap" id="stats-chart-wrap" aria-live="polite">
+                                    <!-- SVG injected here -->
+                                </div>
+                                <div class="stats-axis-label" id="stats-axis-label"></div>
+                            </figure>
+
+                            <div class="stats-summary-head">
+                                <span class="stats-summary-eyebrow">Summary statistics</span>
+                                <button type="button" class="stats-glossary-btn" id="stats-glossary-btn"
+                                        aria-label="What do these statistics mean?">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <circle cx="12" cy="8" r="0.5" fill="currentColor"></circle>
+                                    </svg>
+                                    <span>What do these mean?</span>
+                                </button>
+                            </div>
+
+                            <div class="stats-summary" id="stats-summary" aria-live="polite">
+                                <!-- LABEL …… VALUE rows injected here -->
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -274,10 +328,12 @@
 
         <!-- Lagoon Detail Modal -->
         <div id="lagoon-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Lagoon Details</h3>
-                    <button class="modal-close" id="close-lagoon-modal">&times;</button>
+            <div class="modal-content lagoon-modal-content">
+                <div class="modal-header lagoon-modal-header">
+                    <div class="lagoon-modal-titleblock" id="lagoon-modal-titleblock">
+                        <!-- Populated by ModalManager -->
+                    </div>
+                    <button class="modal-close" id="close-lagoon-modal" aria-label="Close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div id="lagoon-details">
@@ -290,27 +346,31 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-content">
-                <span>Developed by
-                    <a href="mailto:alexliaskos@geol.uoa.gr" target="_blank" rel="noopener"
-                        style="color:inherit;text-decoration:none;">Alexandros Liaskos</a></span>
-                <span class="footer-divider">|</span>
-                <button id="about-btn" class="references-btn">About</button>
-                <span class="footer-divider">|</span>
-                <button id="references-btn" class="references-btn">Cite</button>
-                <span class="footer-divider">|</span>
-                <button id="submit-data-btn" class="references-btn">Submit Data</button>
-                <span class="footer-divider">|</span>
-                <button id="report-bug-btn" class="references-btn">Report Issue</button>
-                <span class="footer-divider">|</span>
-                <button id="submit-suggestion-btn" class="references-btn">Suggest Feature</button>
-                <span class="footer-divider">|</span>
-                <a href="https://github.com/uoa-gr/Lagoons" target="_blank" rel="noopener" class="github-link"
-                    title="View on GitHub" style="color:inherit;text-decoration:none;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;">
-                        <path
-                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                </a>
+                <!-- Left: developer signature -->
+                <span class="footer-credit">
+                    <span class="footer-credit-eyebrow">Developed by</span>
+                    <a href="https://liaskos.eu" target="_blank" rel="noopener noreferrer"
+                       class="footer-signature">Alexandros Liaskos</a>
+                </span>
+
+                <!-- Right: editorial action menu -->
+                <nav class="footer-nav" aria-label="Site links">
+                    <button id="about-btn"             class="footer-link" type="button">About</button>
+                    <span class="footer-dot" aria-hidden="true">·</span>
+                    <button id="references-btn"        class="footer-link" type="button">Cite</button>
+                    <span class="footer-dot" aria-hidden="true">·</span>
+                    <button id="submit-data-btn"       class="footer-link" type="button">Submit&nbsp;data</button>
+                    <span class="footer-dot" aria-hidden="true">·</span>
+                    <button id="report-bug-btn"        class="footer-link" type="button">Report</button>
+                    <span class="footer-dot" aria-hidden="true">·</span>
+                    <button id="submit-suggestion-btn" class="footer-link" type="button">Suggest</button>
+                    <a href="https://github.com/uoa-gr/Lagoons" target="_blank" rel="noopener noreferrer"
+                       class="footer-github" title="View on GitHub" aria-label="View on GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                </nav>
             </div>
         </footer>
 
@@ -432,6 +492,194 @@
                     <div class="filter-modal-footer">
                         <button id="filter-modal-clear" class="btn-secondary">Clear Selection</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About the data — shared quick reference -->
+        <div id="about-data-modal" class="modal stats-glossary-modal about-data-modal" role="dialog" aria-labelledby="about-data-title">
+            <div class="modal-content stats-glossary-content">
+                <div class="modal-header">
+                    <h3 id="about-data-title">About the data</h3>
+                    <button class="modal-close" id="close-about-data" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body about-data-body">
+                    <p class="stats-glossary-lead">
+                        An interactive Web GIS for the coastal lagoons of Greece — explore each
+                        lagoon's morphometry and its projected exposure to sea-level rise under two
+                        IPCC&nbsp;AR6 climate scenarios.
+                    </p>
+
+                    <h4 class="stats-glossary-section">What you can do here</h4>
+                    <ul class="stats-glossary-list">
+                        <li>Browse all 152 lagoons on the map; click any marker for a detail card with a mini-map of the polygon.</li>
+                        <li>Filter by location, island, or projected inundation status; combine filters with a SQL-style query builder.</li>
+                        <li>Open the <strong>Statistics</strong> tab to see the distribution of any variable across the currently visible set, with histograms, summary statistics, and bar-by-bar drill-down.</li>
+                        <li>Search by name, location, or island; submit corrections or new records via the footer links.</li>
+                    </ul>
+
+                    <h4 class="stats-glossary-section">Climate scenarios (IPCC AR6)</h4>
+                    <table class="stats-glossary-table">
+                        <thead>
+                            <tr><th>Code</th><th>Name</th><th>What it means</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SSP1-2.6</td>
+                                <td>Low emissions</td>
+                                <td>Sustainability pathway with strong mitigation; warming kept below ~2&nbsp;°C by 2100.</td>
+                            </tr>
+                            <tr>
+                                <td>SSP5-8.5</td>
+                                <td>High emissions</td>
+                                <td>Fossil-fuelled development; limited mitigation, warming ~4–5&nbsp;°C by 2100.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="stats-glossary-section">Sea-level rise &amp; vertical land motion</h4>
+                    <table class="stats-glossary-table">
+                        <thead>
+                            <tr><th>Term</th><th>Meaning</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SLR</td>
+                                <td>Projected sea-level rise (m) by 2100 under the chosen climate scenario.</td>
+                            </tr>
+                            <tr>
+                                <td>VLM</td>
+                                <td><strong>Vertical Land Motion</strong> — local subsidence or uplift of the coast. Adding VLM to climate-driven SLR gives a more realistic estimate of the <em>relative</em> sea-level change a specific lagoon will experience.</td>
+                            </tr>
+                            <tr>
+                                <td>geocentric</td>
+                                <td>SLR taken straight from the climate model, with no local land-motion correction.</td>
+                            </tr>
+                            <tr>
+                                <td>VLM-corrected</td>
+                                <td>SLR adjusted for local subsidence or uplift. Available where InSAR-grade VLM observations exist (~55&nbsp;% of lagoons).</td>
+                            </tr>
+                            <tr>
+                                <td>(SSP-based)</td>
+                                <td>On the inundation column, marks records where no local VLM was available, so the geocentric SSP outcome was used as a fallback.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="stats-glossary-section">Morphometry</h4>
+                    <table class="stats-glossary-table">
+                        <thead>
+                            <tr><th>Field</th><th>Meaning</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Area</td><td>Polygon area (km²).</td></tr>
+                            <tr><td>Perimeter</td><td>Polygon perimeter (km).</td></tr>
+                            <tr><td>Length / Width</td><td>Maximum lengths along principal axes (m).</td></tr>
+                            <tr><td>Sandspit max height</td><td>Highest elevation along the lagoon-enclosing barrier (m above MSL).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics: Glossary -->
+        <div id="stats-glossary-modal" class="modal stats-glossary-modal" role="dialog" aria-labelledby="stats-glossary-title">
+            <div class="modal-content stats-glossary-content">
+                <div class="modal-header">
+                    <h3 id="stats-glossary-title">Statistics — quick reference</h3>
+                    <button class="modal-close" id="close-stats-glossary" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="stats-glossary-lead">
+                        How to read each value shown in the panel. All statistics are computed
+                        on the lagoons currently visible (after filters and SQL queries).
+                    </p>
+
+                    <h4 class="stats-glossary-section">Numeric variables</h4>
+                    <table class="stats-glossary-table">
+                        <thead>
+                            <tr><th>Symbol</th><th>Name</th><th>Definition</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>n</td><td>Sample size</td><td>Count of lagoons with a value.</td></tr>
+                            <tr><td>μ</td><td>Mean</td><td>Arithmetic average; sum divided by n.</td></tr>
+                            <tr><td>med</td><td>Median</td><td>50th percentile; half the values fall below, half above.</td></tr>
+                            <tr><td>σ</td><td>Std. dev.</td><td>Sample standard deviation; typical distance of a value from the mean.</td></tr>
+                            <tr><td>min / max</td><td>Extrema</td><td>Smallest and largest observed values.</td></tr>
+                            <tr><td>range</td><td>Range</td><td>max − min.</td></tr>
+                            <tr><td>Q1, Q3</td><td>Quartiles</td><td>25th and 75th percentiles; the middle 50% of the data lies between them.</td></tr>
+                            <tr><td>IQR</td><td>Interquartile range</td><td>Q3 − Q1; a measure of spread.</td></tr>
+                            <tr><td>g₁</td><td>Skewness</td><td>Asymmetry; 0 ≈ symmetric; positive ≈ long right tail. <em class="stats-glossary-note">|g₁| &gt; 1.5 auto-switches the histogram to log scale.</em></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="stats-glossary-section">Categorical variables</h4>
+                    <table class="stats-glossary-table">
+                        <thead>
+                            <tr><th>Symbol</th><th>Name</th><th>Definition</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>n</td><td>Sample size</td><td>Count of lagoons with a value.</td></tr>
+                            <tr><td>unique</td><td>Unique values</td><td>Number of distinct categories present.</td></tr>
+                            <tr><td>mode</td><td>Mode</td><td>Most frequent value, with its count and share of n.</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="stats-glossary-section">Plot conventions</h4>
+                    <ul class="stats-glossary-list">
+                        <li><strong>Histogram bars:</strong> bin counts. Click a bar to list the lagoons in that range.</li>
+                        <li><strong class="is-mean">μ</strong>, <strong class="is-median">med</strong>: vertical reference lines at mean and median.</li>
+                        <li><strong>Log scale</strong>: applied automatically to heavily right-skewed variables (|g₁| &gt; 1.5).</li>
+                        <li><strong>Frequency bars:</strong> count of records per category, sorted descending. Click a bar to list its lagoons.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics: Lagoons in selected bin / category -->
+        <div id="stats-bin-modal" class="modal filter-selection-modal stats-bin-modal" role="dialog" aria-labelledby="stats-bin-modal-title">
+            <div class="modal-content filter-selection-modal-content">
+                <div class="modal-header">
+                    <h3 id="stats-bin-modal-title">Lagoons in selection</h3>
+                    <button class="modal-close" id="close-stats-bin" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="stats-bin-summary" id="stats-bin-summary" aria-live="polite"></div>
+                    <div id="stats-bin-list" class="filter-modal-list stats-bin-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Variable Selection Modal -->
+        <div id="fbc-variable-modal" class="modal filter-selection-modal stats-variable-modal" role="dialog" aria-labelledby="fbc-variable-modal-title">
+            <div class="modal-content filter-selection-modal-content">
+                <div class="modal-header">
+                    <h3 id="fbc-variable-modal-title">Filter by</h3>
+                    <button class="modal-close" id="close-fbc-variable" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-modal-search">
+                        <input type="text" id="fbc-variable-search-input" class="filter-modal-search-input"
+                            placeholder="Search variables…" autocomplete="off">
+                    </div>
+                    <div id="fbc-variable-list" class="filter-modal-list stats-variable-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Variable Selection Modal -->
+        <div id="stats-variable-modal" class="modal filter-selection-modal stats-variable-modal" role="dialog" aria-labelledby="stats-variable-modal-title">
+            <div class="modal-content filter-selection-modal-content">
+                <div class="modal-header">
+                    <h3 id="stats-variable-modal-title">Select Variable</h3>
+                    <button class="modal-close" id="close-stats-variable" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-modal-search">
+                        <input type="text" id="stats-variable-search-input" class="filter-modal-search-input"
+                            placeholder="Search variables…" autocomplete="off">
+                    </div>
+                    <div id="stats-variable-list" class="filter-modal-list stats-variable-list"></div>
                 </div>
             </div>
         </div>

@@ -52,7 +52,11 @@ class DataManager {
         };
         const cacheKey = `markers:${JSON.stringify(params)}`;
         const cached = this.cacheManager.get(cacheKey);
-        if (cached) return cached;
+        if (cached) {
+            // Keep state in sync — listeners (statistics panel etc.) read from currentData
+            this.stateManager.set('currentData', cached);
+            return cached;
+        }
 
         let data;
         try {

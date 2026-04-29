@@ -133,9 +133,45 @@ class MarkerManager {
     }
 
     buildTooltipHTML(lagoon) {
-        const rcp26 = lagoon.rcp2_6_inundated ? lagoon.rcp2_6_inundated.toUpperCase() : '-';
-        const rcp85 = lagoon.rcp8_5_inundated ? lagoon.rcp8_5_inundated.toUpperCase() : '-';
-        const area  = lagoon.area_km2 != null ? `${parseFloat(lagoon.area_km2).toFixed(2)} km²` : '-';
+        const fmtNum = (v, digits, unit) => {
+            if (v == null || v === '') return '—';
+            const n = parseFloat(v);
+            return Number.isFinite(n) ? `${n.toFixed(digits)} ${unit}` : '—';
+        };
+
+        const area = fmtNum(lagoon.area_km2, 2, 'km²');
+
+        // Pick VLM-corrected when available, geocentric otherwise; tag which one is shown.
+        // (vec_slr === 0 is a sentinel for "no local VLM" — already normalised to null upstream.)
+        const slrParts = (vecVal, geoVal) => {
+            const vec = parseFloat(vecVal);
+            const geo = parseFloat(geoVal);
+            const useVlm = Number.isFinite(vec) && Math.abs(vec) > 1e-9;
+            const v = useVlm ? vec : geo;
+            const tag = useVlm ? 'VLM' : 'geo';
+            return Number.isFinite(v)
+                ? { value: `${parseFloat(v).toFixed(2)} m`, tag }
+                : { value: '—', tag: null };
+        };
+        const slr_26 = slrParts(lagoon.rcp2_6_vec_slr, lagoon.rcp2_6_slr);
+        const slr_85 = slrParts(lagoon.rcp8_5_vec_slr, lagoon.rcp8_5_slr);
+        const slrTagHtml = (t) => t.tag
+            ? `<span class="lagoon-hover-basis-tag is-${t.tag}">${t.tag}</span>`
+            : '<span class="lagoon-hover-basis-tag is-empty" aria-hidden="true"></span>';
+
+        const loc    = (lagoon.location_en || '').trim();
+        const island = (lagoon.island_en   || '').trim();
+        const sameWord = loc && island && loc.toLowerCase() === island.toLowerCase();
+        const localityHtml = (loc || island)
+            ? `<div class="lagoon-hover-locality">
+                 <svg class="lagoon-hover-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                     <circle cx="12" cy="10" r="3"/>
+                 </svg>
+                 ${loc ? `<span class="lagoon-hover-loc-main">${escapeHtml(loc)}</span>` : ''}
+                 ${island && (!loc || !sameWord) ? `${loc ? `<span class="lagoon-hover-loc-dot" aria-hidden="true">·</span>` : ''}<span class="lagoon-hover-loc-island">${escapeHtml(island)}</span>` : ''}
+               </div>`
+            : '';
 
         return `
             <div class="lagoon-hover-card">
@@ -143,12 +179,32 @@ class MarkerManager {
                     <div class="lagoon-preview-map" data-tooltip-preview-map></div>
                 </div>
                 <div class="lagoon-hover-body">
-                    <div class="lagoon-hover-name">${escapeHtml(lagoon.name_en || 'Unnamed')}</div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Location</span><span class="lagoon-hover-value">${escapeHtml(lagoon.location_en || '-')}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Island</span><span class="lagoon-hover-value">${escapeHtml(lagoon.island_en || '-')}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Area</span><span class="lagoon-hover-value">${escapeHtml(area)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP1-2.6</span><span class="lagoon-hover-value">${escapeHtml(rcp26)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP5-8.5</span><span class="lagoon-hover-value">${escapeHtml(rcp85)}</span></div>
+                    <span class="lagoon-hover-eyebrow">Coastal lagoon</span>
+                    <h3 class="lagoon-hover-name">
+                        <span class="lagoon-hover-name-en">${escapeHtml(lagoon.name_en || 'Unnamed')}</span>
+                        ${lagoon.name_gr ? `
+                            <span class="lagoon-hover-name-sep" aria-hidden="true">/</span>
+                            <span class="lagoon-hover-name-gr">${escapeHtml(lagoon.name_gr)}</span>
+                        ` : ''}
+                    </h3>
+                    ${localityHtml}
+                    <div class="lagoon-hover-stats">
+                        <div class="lagoon-hover-stat">
+                            <span class="lagoon-hover-stat-label">Area</span>
+                            <span class="lagoon-hover-basis-tag is-empty" aria-hidden="true"></span>
+                            <span class="lagoon-hover-stat-value">${escapeHtml(area)}</span>
+                        </div>
+                        <div class="lagoon-hover-stat">
+                            <span class="lagoon-hover-stat-label">SSP1-2.6 SLR</span>
+                            ${slrTagHtml(slr_26)}
+                            <span class="lagoon-hover-stat-value">${escapeHtml(slr_26.value)}</span>
+                        </div>
+                        <div class="lagoon-hover-stat">
+                            <span class="lagoon-hover-stat-label">SSP5-8.5 SLR</span>
+                            ${slrTagHtml(slr_85)}
+                            <span class="lagoon-hover-stat-value">${escapeHtml(slr_85.value)}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
