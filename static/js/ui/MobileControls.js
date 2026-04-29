@@ -125,7 +125,7 @@ class MobileControls {
             statsToggle.classList.add('active');
             filtersToggle?.classList.remove('active');
             searchToggle?.classList.remove('active');
-            this.switchToTab('stats');
+            this.switchToTab('statistics');
         }
     }
 

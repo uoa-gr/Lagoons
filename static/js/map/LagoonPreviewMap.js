@@ -19,6 +19,8 @@ class LagoonPreviewMap {
 
         this.destroy(container);
 
+        const locator = !!options.locator;
+
         const map = L.map(container, {
             zoomControl: false,
             attributionControl: false,
@@ -28,62 +30,76 @@ class LagoonPreviewMap {
             boxZoom: false,
             keyboard: false,
             tap: false,
-            touchZoom: false
+            touchZoom: false,
+            zoomSnap: locator ? 0.25 : 1
         });
 
         this.instances.set(container, map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // No-labels variant of CartoDB Positron — country/city names removed for a clean preview
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            attribution: '',
+            subdomains: 'abcd',
             maxZoom: 19
         }).addTo(map);
 
+        const lat = parseFloat(lagoon.centroid_lat ?? lagoon.centroidLat);
+        const lng = parseFloat(lagoon.centroid_lng ?? lagoon.centroidLng);
+        const hasPoint = !Number.isNaN(lat) && !Number.isNaN(lng);
+
+        // Locator mode: fixed view (or fitted to a passed bbox), just a dot
+        if (locator) {
+            if (Array.isArray(options.fitBounds) && options.fitBounds.length === 2) {
+                map.fitBounds(options.fitBounds, {
+                    animate: false,
+                    padding: options.fitPadding || [4, 4]
+                });
+            } else {
+                map.setView(options.center || [39, 23], options.zoom ?? 5);
+            }
+            if (hasPoint) {
+                L.circleMarker([lat, lng], {
+                    radius: 5,
+                    color: '#ffffff',
+                    weight: 1.5,
+                    fillColor: '#b91c1c',
+                    fillOpacity: 1
+                }).addTo(map);
+            }
+            // Use both rAF and a setTimeout fallback — rAF can be throttled when the
+            // host modal is mid-open transition.
+            const ensureSized = () => map.getContainer() && map.invalidateSize(false);
+            requestAnimationFrame(ensureSized);
+            setTimeout(ensureSized, 50);
+            return map;
+        }
+
+        // Detail mode: polygon (if available) and bounds-fit
         const polygonGeoJson = this.normalizeGeoJson(lagoon.geojson);
         let bounds = null;
 
         if (polygonGeoJson) {
             try {
                 const polygon = L.geoJSON(polygonGeoJson, {
-                    style: {
-                        color: '#1e3a5f',
-                        weight: 3,
-                        fillColor: '#1d4ed8',
-                        fillOpacity: 0.4
-                    }
+                    style: { color: '#1e3a5f', weight: 3, fillColor: '#1d4ed8', fillOpacity: 0.4 }
                 }).addTo(map);
-
                 bounds = polygon.getBounds();
             } catch (error) {
-                if (window.DEBUG_MODE) {
-                    console.warn('LagoonPreviewMap: Failed to draw polygon preview', error);
-                }
+                if (window.DEBUG_MODE) console.warn('LagoonPreviewMap: Failed to draw polygon', error);
             }
         }
 
-        const lat = parseFloat(lagoon.centroid_lat ?? lagoon.centroidLat);
-        const lng = parseFloat(lagoon.centroid_lng ?? lagoon.centroidLng);
-
-        if (!Number.isNaN(lat) && !Number.isNaN(lng) && !bounds) {
+        if (hasPoint && !bounds) {
             L.circleMarker([lat, lng], {
-                radius: 4,
-                color: '#ffffff',
-                weight: 1.2,
-                fillColor: '#dc2626',
-                fillOpacity: 1
+                radius: 4, color: '#ffffff', weight: 1.2,
+                fillColor: '#dc2626', fillOpacity: 1
             }).addTo(map);
-
-            if (!bounds || !bounds.isValid()) {
-                bounds = L.latLngBounds([lat, lng], [lat, lng]);
-            }
+            bounds = L.latLngBounds([lat, lng], [lat, lng]);
         }
 
         this.fitMap(map, bounds, options);
 
-        requestAnimationFrame(() => {
-            if (map.getContainer()) {
-                map.invalidateSize(false);
-            }
-        });
-
+        requestAnimationFrame(() => map.getContainer() && map.invalidateSize(false));
         return map;
     }
 

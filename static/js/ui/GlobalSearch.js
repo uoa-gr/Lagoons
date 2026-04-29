@@ -28,9 +28,9 @@ class GlobalSearch {
 
     cacheElements() {
         this.elements = {
-            input:     document.getElementById('global-search'),
-            container: document.getElementById('search-container'),
-            results:   document.getElementById('search-results'),
+            input:     document.getElementById('global-search-input'),
+            container: document.querySelector('#search-tab .search-panel'),
+            results:   document.getElementById('global-search-results'),
             clearBtn:  document.getElementById('search-clear')
         };
     }
@@ -50,9 +50,9 @@ class GlobalSearch {
 
         clearBtn?.addEventListener('click', () => this.clearSearch());
 
-        // Hide on outside click
+        // Hide on outside click (clicks inside the search panel keep results open)
         document.addEventListener('click', e => {
-            if (!e.target.closest('#search-container')) this.hideResults();
+            if (!e.target.closest('#search-tab')) this.hideResults();
         });
     }
 

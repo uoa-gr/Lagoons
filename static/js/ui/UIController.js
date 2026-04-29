@@ -25,6 +25,7 @@ class UIController {
         this.initTabNavigation();
         this.initButtonHandlers();
         this.initLoadingIndicator();
+        this.initDataOpensHandlers();
         this.initEventListeners();
 
         if (window.DEBUG_MODE) {
@@ -57,6 +58,8 @@ class UIController {
 
                 if (tabContent) {
                     tabContent.classList.add('active');
+                    // Surface active tab on <body> so CSS can scope rules per tab
+                    document.body.dataset.activeTab = button.dataset.tab;
 
                     // Emit event
                     this.eventBus.emit('ui:tabChanged', {
@@ -65,6 +68,10 @@ class UIController {
                 }
             });
         });
+
+        // Initial state: whichever tab has .active class at load
+        const initialActive = document.querySelector('.tab-button.active');
+        if (initialActive) document.body.dataset.activeTab = initialActive.dataset.tab;
 
         if (window.DEBUG_MODE) {
             console.log('📑 UIController: Tab navigation initialized');
@@ -141,6 +148,36 @@ class UIController {
         // Subscribe to loading state changes
         this.stateManager.subscribe('isLoading', (isLoading) => {
             this.setLoading(isLoading);
+        });
+    }
+
+    /**
+     * Wire delegated openers like [data-opens="about-data-modal"] anywhere in the page.
+     * @private
+     */
+    initDataOpensHandlers() {
+        document.addEventListener('click', e => {
+            const trigger = e.target.closest('[data-opens]');
+            if (!trigger) return;
+            const id = trigger.dataset.opens;
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            e.preventDefault();
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+        });
+
+        // Generic close: close button + backdrop click, for the about-data modal
+        const aboutClose = document.getElementById('close-about-data');
+        const aboutModal = document.getElementById('about-data-modal');
+        const closeAbout = () => {
+            aboutModal?.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        };
+        aboutClose?.addEventListener('click', closeAbout);
+        aboutModal?.addEventListener('click', e => { if (e.target === aboutModal) closeAbout(); });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && aboutModal?.classList.contains('active')) closeAbout();
         });
     }
 

@@ -376,7 +376,6 @@ class FilterManager {
     updateSelectorValue(filterKey, value) {
         const btn = this.filterElements[`${filterKey}Btn`];
         const config = this.filterConfig[filterKey];
-
         if (!btn || !config) return;
 
         const valueSpan = btn.querySelector('.filter-selector-value');

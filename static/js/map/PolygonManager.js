@@ -33,6 +33,15 @@ class PolygonManager {
         if (this.polygonsVisible) this._updatePolygonLayer();
     }
 
+    /**
+     * Restrict rendered polygons to a set of lagoon ids (client-side).
+     * Pass null/undefined to show all polygons in cache.
+     */
+    setVisibleIdSet(ids) {
+        this.visibleIds = (ids != null) ? new Set(ids) : null;
+        if (this.polygonsVisible && this.cachedData) this._renderPolygons();
+    }
+
     _onZoom() {
         const zoom = this.map.getZoom();
         if (zoom >= POLYGON_ZOOM_THRESHOLD) {
@@ -47,36 +56,44 @@ class PolygonManager {
             if (!this.cachedData) {
                 this.cachedData = await this.dataManager.fetchPolygonData(this.activeFilters);
             }
-            this._removePolygonLayer();
-            if (!this.cachedData || this.cachedData.length === 0) return;
-
-            const geojsonFeatures = this.cachedData
-                .filter(r => r.geojson)
-                .map(r => ({
-                    type: 'Feature',
-                    geometry: JSON.parse(r.geojson),
-                    properties: {
-                        id: r.id, name_en: r.name_en, location_en: r.location_en,
-                        island_en: r.island_en, area_km2: r.area_km2,
-                        rcp2_6_inundated: r.rcp2_6_inundated, rcp8_5_inundated: r.rcp8_5_inundated
-                    }
-                }));
-
-            if (geojsonFeatures.length === 0) return;
-
-            this.polygonLayer = L.geoJSON(
-                { type: 'FeatureCollection', features: geojsonFeatures },
-                {
-                    style: feature => this._polygonStyle(feature),
-                    onEachFeature: (feature, layer) => this._bindPolygonInteractions(feature, layer)
-                }
-            );
-            this.polygonLayer.addTo(this.map);
-
-            if (window.DEBUG_MODE) console.log(`✅ PolygonManager: ${geojsonFeatures.length} polygons rendered`);
+            this._renderPolygons();
         } catch (error) {
             console.error('PolygonManager: Error loading polygons', error);
         }
+    }
+
+    _renderPolygons() {
+        this._removePolygonLayer();
+        if (!this.cachedData || this.cachedData.length === 0) return;
+
+        const source = this.visibleIds
+            ? this.cachedData.filter(r => this.visibleIds.has(r.id))
+            : this.cachedData;
+
+        const geojsonFeatures = source
+            .filter(r => r.geojson)
+            .map(r => ({
+                type: 'Feature',
+                geometry: JSON.parse(r.geojson),
+                properties: {
+                    id: r.id, name_en: r.name_en, location_en: r.location_en,
+                    island_en: r.island_en, area_km2: r.area_km2,
+                    rcp2_6_inundated: r.rcp2_6_inundated, rcp8_5_inundated: r.rcp8_5_inundated
+                }
+            }));
+
+        if (geojsonFeatures.length === 0) return;
+
+        this.polygonLayer = L.geoJSON(
+            { type: 'FeatureCollection', features: geojsonFeatures },
+            {
+                style: feature => this._polygonStyle(feature),
+                onEachFeature: (feature, layer) => this._bindPolygonInteractions(feature, layer)
+            }
+        );
+        this.polygonLayer.addTo(this.map);
+
+        if (window.DEBUG_MODE) console.log(`✅ PolygonManager: ${geojsonFeatures.length} polygons rendered`);
     }
 
     _removePolygonLayer() {
