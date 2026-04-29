@@ -91,7 +91,13 @@ class StatusBar {
         right.append(coords, scale);
 
         this.container.append(leftCol, right);
-        mapContainer.appendChild(this.container);
+        // Append as a sibling of #map inside .map-container, NOT inside the
+        // Leaflet container. This lets mobile lay it out as a normal block
+        // strip below the map (CSS turns .map-container into a flex column
+        // at narrow widths) while desktop still sees it as an absolute overlay
+        // on top of the map (.map-container is position:relative).
+        const outer = mapContainer.parentNode || mapContainer;
+        outer.appendChild(this.container);
 
         this.elements.lat            = this.container.querySelector('#status-lat');
         this.elements.lng            = this.container.querySelector('#status-lng');
