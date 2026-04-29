@@ -1581,20 +1581,26 @@ body.sidebar-collapsed .rail-btn:hover {
     .map-status-bar { font-size: 0.62rem; padding: 0 0.45rem 0.45rem; }
     .status-label { display: none; }
 
-    /* Compact legend always visible; trim every part */
+    /* Compact legend — every row visible (high / medium / low) */
     .status-bar-legend {
-        padding: 0.4rem 0.55rem 0.45rem;
-        gap: 0.16rem;
+        padding: 0.4rem 0.55rem 0.5rem;
+        gap: 0.18rem;
     }
     .legend-title { font-size: 0.64rem; }
     .legend-text  { font-size: 0.64rem; }
     .legend-count { font-size: 0.62rem; min-width: 1.2em; }
-    .legend-row   { padding: 0.05rem 0; column-gap: 0.35rem; }
+    .legend-row   { padding: 0.06rem 0; column-gap: 0.35rem; min-height: 0; }
     .legend-dot   { width: 9px; height: 9px; }
 
-    /* Hide scale + coords on phones — pointer-driven, hard to read inline,
-       leaving the legend with full width to breathe. */
-    .status-bar-right { display: none; }
+    /* Scale stays visible (always-relevant), coords hidden (no mousemove
+       on touch devices) — keep just the scale fraction in a compact pill. */
+    .status-bar-right {
+        padding: 0.35rem 0.55rem;
+        gap: 0;
+    }
+    .status-coords { display: none; }
+    .status-bar-right > .status-scale::before { content: none; }
+    .status-scale { font-size: 0.62rem; }
 }
 
 /* Loading Indicator - Minimal */
