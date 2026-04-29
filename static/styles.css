@@ -305,32 +305,32 @@ h6 { font-size: 0.75rem; }
 
 .header h1 {
     color: var(--text-primary);
-    font-family: 'Cormorant Garamond', var(--font-serif);
-    font-weight: 500;
-    font-style: italic;
-    font-size: clamp(1.7rem, 3.4vw, 2.3rem);
-    line-height: 1;
-    letter-spacing: -0.005em;
+    /* Whole title now in Italianno calligraphic script — same family on
+       both spans, only the colour differs for the italic continuation. */
+    font-family: 'Italianno', cursive;
+    font-weight: 400;
+    font-style: normal;
+    font-size: clamp(2.6rem, 5vw, 3.4rem);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
     text-transform: none;
     text-indent: 0;
     margin: 0;
     white-space: nowrap;
-    /* Inline-flex with baseline alignment makes both spans sit on the
-       same baseline regardless of font size or font-specific metrics —
-       no vertical-align/transform hacks needed. */
     display: inline-flex;
     align-items: baseline;
     gap: 0.18em;
-    font-feature-settings: "dlig" 1, "salt" 1, "calt" 1, "kern" 1, "liga" 1;
 }
 .header h1 em {
-    font-family: 'Italianno', cursive;
+    /* Inherits font-family, size, and weight from the h1; only the colour
+       changes so 'of Earth' reads as a quieter continuation. */
+    font-family: inherit;
     font-style: normal;
-    font-weight: 400;
+    font-weight: inherit;
     color: var(--text-secondary);
-    font-size: 1.45em;
-    line-height: 0.6;
-    letter-spacing: 0.01em;
+    font-size: 1em;
+    line-height: inherit;
+    letter-spacing: inherit;
 }
 
 .subtitle {
@@ -363,15 +363,12 @@ h6 { font-size: 0.75rem; }
     }
 
     .header h1 {
-        /* Single-line italic, scaled for phones */
-        font-size: 1.4rem;
+        /* Italianno calligraphic title, scaled for phones */
+        font-size: 2.1rem;
         margin: 0;
-        letter-spacing: -0.005em;
+        letter-spacing: 0.01em;
         text-indent: 0;
-    }
-    .header h1 em {
-        font-size: 1.45em;
-        line-height: 0.6;
+        line-height: 0.9;
     }
     .header-title { gap: 0.7rem; }
     .header-rule  { width: clamp(20px, 8vw, 50px); }
