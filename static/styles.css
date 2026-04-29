@@ -308,8 +308,9 @@ h6 { font-size: 0.75rem; }
     font-weight: 400;
     font-style: italic;
     letter-spacing: 0;
-    line-height: 1.4;
-    margin: 0;
+    line-height: 1.5;
+    max-width: 36rem;
+    margin: 0 auto;
 }
 
 /* Mobile header/layout tuning */
@@ -325,17 +326,21 @@ h6 { font-size: 0.75rem; }
 
     .header h1 {
         /* Make title readable on small screens */
-        font-size: 1.25rem;
-        margin-bottom: 0.2rem;
-        letter-spacing: 0.08em;
+        font-size: 1.6rem;
+        margin: 0 0 0.3rem;
+        letter-spacing: 0.22em;
+        text-indent: 0.22em;
     }
 
     .subtitle {
         /* Ensure subtitle is visible on mobile (some older rules may hide it) */
         display: block !important;
-        font-size: 0.75rem;
-        letter-spacing: 0.03em;
-        opacity: 0.9;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        letter-spacing: 0;
+        opacity: 1;
+        max-width: 28rem;
+        padding: 0 0.5rem;
     }
 
     .mobile-controls {
@@ -8177,8 +8182,65 @@ body[data-active-tab="filters"] .sidebar-content {
     .wm .wm-content { width: calc(100vw - 1rem); max-height: 96vh; }
     .wm-poster { padding: 1.5rem 1.1rem 1.3rem; }
     .wm-title { font-size: 2rem; }
-    .wm-deck { font-size: 0.95rem; }
-    .wm-coverage { gap: 0.9rem; }
-    .wm-stage-tagline em { font-size: 1.4rem; }
+    .wm-title-italic { font-size: 1.4rem; }
+    .wm-deck { font-size: 0.92rem; }
+
+    /* Coverage block stacks on narrow screens */
+    .wm-coverage {
+        flex-direction: column;
+        gap: 0.65rem;
+        align-items: center;
+    }
+    .wm-cov-divider { display: none; }
+    .wm-cov-block { align-items: center; text-align: center; }
+
+    /* Footer 3-column collapses; signature centered between cred + CTA */
+    .wm-foot { gap: 0.9rem; }
+    .wm-cred { justify-content: center; text-align: center; }
+    .wm-cred-text { align-items: center; }
+    .wm-sig-tag { justify-content: center; }
+    .wm-signature-sm { font-size: 1.2rem; }
+}
+
+/* ===========================================================
+   Global mobile safeguards — prevent horizontal overflow,
+   tighten the persistent app footer, and keep the FilterByChart
+   panel from spilling out of narrow viewports.
+   =========================================================== */
+
+html, body { overflow-x: hidden; }
+.wm-content,
+.fbc-panel,
+.footer-content,
+.modal-content {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    /* App footer — keep signature compact */
+    .footer-content { gap: 0.5rem; padding: 0 0.85rem; }
+    .footer-credit  { flex-wrap: wrap; justify-content: center; gap: 0.3rem; }
+    .footer-signature { font-size: 1.05rem; }
+    .footer-link { font-size: 0.82rem; }
+    .footer-dot { font-size: 0.72rem; }
+    .footer-nav { gap: 0.35rem; }
+
+    /* FilterByChart — ensure long values truncate cleanly */
+    #filters-tab .fbc-picker-value { font-size: 1.05rem; }
+    #filters-tab .fbc-list-row { padding: 0.38rem 0.15rem; }
+    .fbc-active-popover {
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        width: auto !important;
+        max-width: calc(100vw - 1rem) !important;
+    }
+    .fbc-chip-text { max-width: 14ch; }
+
+    /* Lagoon detail modal margins */
+    .lagoon-modal-content { width: calc(100vw - 1rem); max-height: 94vh; }
+
+    /* Header subtitle wraps cleanly on phones */
+    .subtitle { max-width: 100%; padding: 0 0.5rem; }
 }
 
