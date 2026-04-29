@@ -1578,29 +1578,54 @@ body.sidebar-collapsed .rail-btn:hover {
 }
 
 @media (max-width: 480px) {
-    .map-status-bar { font-size: 0.62rem; padding: 0 0.45rem 0.45rem; }
+    .map-status-bar {
+        font-size: 0.62rem;
+        padding: 0 0.4rem 0.4rem;
+        gap: 0.35rem;
+    }
     .status-label { display: none; }
 
-    /* Compact legend — every row visible (high / medium / low) */
+    /* Compact legend — bounded so it CAN'T overflow the viewport */
     .status-bar-legend {
         padding: 0.4rem 0.55rem 0.5rem;
         gap: 0.18rem;
+        max-width: calc(100vw - 5.5rem);   /* reserves room for the scale on the right */
+        box-sizing: border-box;
+        overflow: hidden;
     }
     .legend-title { font-size: 0.64rem; }
-    .legend-text  { font-size: 0.64rem; }
-    .legend-count { font-size: 0.62rem; min-width: 1.2em; }
-    .legend-row   { padding: 0.06rem 0; column-gap: 0.35rem; min-height: 0; }
+    .legend-text  {
+        font-size: 0.62rem;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .legend-count { font-size: 0.6rem; min-width: 1.2em; }
+    .legend-row   {
+        padding: 0.06rem 0;
+        column-gap: 0.3rem;
+        min-height: 0;
+        min-width: 0;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
     .legend-dot   { width: 9px; height: 9px; }
 
     /* Scale stays visible (always-relevant), coords hidden (no mousemove
-       on touch devices) — keep just the scale fraction in a compact pill. */
+       on touch devices) — compact pill, capped width. */
     .status-bar-right {
         padding: 0.35rem 0.55rem;
         gap: 0;
+        max-width: 5rem;
+        box-sizing: border-box;
     }
     .status-coords { display: none; }
     .status-bar-right > .status-scale::before { content: none; }
-    .status-scale { font-size: 0.62rem; }
+    .status-scale {
+        font-size: 0.62rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 /* Loading Indicator - Minimal */
