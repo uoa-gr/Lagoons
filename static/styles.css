@@ -1632,23 +1632,6 @@ body.sidebar-collapsed .rail-btn:hover {
     }
     .legend-dot   { width: 9px; height: 9px; }
 
-    /* Shorten verbose labels so the legend fits without horizontal clip. */
-    .legend-row[data-cat="high"]   .legend-text { font-size: 0; }
-    .legend-row[data-cat="high"]   .legend-text::before {
-        content: 'SSP1-2.6 & 5-8.5';
-        font-size: 0.62rem;
-    }
-    .legend-row[data-cat="medium"] .legend-text { font-size: 0; }
-    .legend-row[data-cat="medium"] .legend-text::before {
-        content: 'SSP5-8.5 only';
-        font-size: 0.62rem;
-    }
-    .legend-row[data-cat="low"]    .legend-text { font-size: 0; }
-    .legend-row[data-cat="low"]    .legend-text::before {
-        content: 'Not inundated';
-        font-size: 0.62rem;
-    }
-
     /* Scale stays visible (always-relevant), coords hidden (no mousemove
        on touch devices) — compact pill, intrinsic width so the full
        "1 : 250,000" never gets clipped. */
