@@ -8118,7 +8118,7 @@ body[data-active-tab="filters"] .sidebar-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.05rem;
+    gap: 0.45rem;
     line-height: 1;
     flex: 0 1 auto;
 }
