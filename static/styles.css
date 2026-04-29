@@ -1546,20 +1546,36 @@ body.sidebar-collapsed .rail-btn:hover {
 
 /* Cartographic scale — representative fraction (1 : N) */
 
-/* Tablet: keep the bottom layout (avoids covering Leaflet's zoom +
-   basemap controls at top-left), but allow flex-wrap and smaller items. */
+/* Tablet & phone: take the status bar out of "absolute overlay" mode and
+   render it as a normal strip below the map. .map-container becomes a
+   flex column; #map flexes to fill, the status bar takes its own row.
+   This guarantees the bar is ALWAYS visible regardless of mobile URL bar,
+   safe-area, dynamic viewport, etc. */
 @media (max-width: 720px) {
+    .map-container {
+        display: flex;
+        flex-direction: column;
+    }
+    .map-container > .leaflet-container,
+    .map-container > #map {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+    }
+
     .map-status-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0 0.5rem 0.5rem;
+        position: static;
+        flex: 0 0 auto;
+        width: 100%;
+        padding: 0.4rem 0.5rem;
         gap: 0.5rem;
+        background: var(--background-primary);
+        border-top: 1px solid var(--border-color);
         flex-direction: row;
         justify-content: space-between;
-        align-items: flex-end;
-        flex-wrap: wrap;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        pointer-events: auto;
     }
     .status-bar-left-col,
     .status-bar-legend,
@@ -1575,22 +1591,21 @@ body.sidebar-collapsed .rail-btn:hover {
 }
 
 @media (max-width: 480px) {
-    /* Stack: legend at bottom-left, scale pill at bottom-right.
-       Use safe-area inset so iOS bottom bar never hides them.
-       Each column is bounded so neither can clip out of the viewport. */
+    /* In-flow strip: tighten padding, allow legend to shrink, keep scale
+       pill at intrinsic width. */
     .map-status-bar {
         font-size: 0.62rem;
-        padding: 0 0.4rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+        padding: 0.35rem 0.4rem;
         gap: 0.35rem;
         flex-wrap: nowrap;
-        align-items: flex-end;
+        align-items: stretch;
     }
     .status-label { display: none; }
 
     .status-bar-left-col {
         flex: 1 1 auto;
         min-width: 0;
-        max-width: calc(100vw - 6.5rem);   /* leaves room for scale pill + gutters */
+        max-width: 100%;
     }
 
     .status-bar-legend {
