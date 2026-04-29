@@ -1575,22 +1575,32 @@ body.sidebar-collapsed .rail-btn:hover {
 }
 
 @media (max-width: 480px) {
+    /* Stack: legend at bottom-left, scale pill at bottom-right.
+       Use safe-area inset so iOS bottom bar never hides them.
+       Each column is bounded so neither can clip out of the viewport. */
     .map-status-bar {
         font-size: 0.62rem;
-        padding: 0 0.4rem 0.4rem;
+        padding: 0 0.4rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
         gap: 0.35rem;
+        flex-wrap: nowrap;
+        align-items: flex-end;
     }
     .status-label { display: none; }
 
-    /* Compact legend — bounded so it CAN'T overflow the viewport */
+    .status-bar-left-col {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: calc(100vw - 6.5rem);   /* leaves room for scale pill + gutters */
+    }
+
     .status-bar-legend {
         padding: 0.4rem 0.55rem 0.5rem;
         gap: 0.18rem;
-        max-width: calc(100vw - 5.5rem);   /* reserves room for the scale on the right */
+        max-width: 100%;
         box-sizing: border-box;
         overflow: hidden;
     }
-    .legend-title { font-size: 0.64rem; }
+    .legend-title { font-size: 0.64rem; flex-wrap: wrap; }
     .legend-text  {
         font-size: 0.62rem;
         min-width: 0;
@@ -1607,22 +1617,53 @@ body.sidebar-collapsed .rail-btn:hover {
     }
     .legend-dot   { width: 9px; height: 9px; }
 
+    /* Shorten verbose labels so the legend fits without horizontal clip. */
+    .legend-row[data-cat="high"]   .legend-text { font-size: 0; }
+    .legend-row[data-cat="high"]   .legend-text::before {
+        content: 'SSP1-2.6 & 5-8.5';
+        font-size: 0.62rem;
+    }
+    .legend-row[data-cat="medium"] .legend-text { font-size: 0; }
+    .legend-row[data-cat="medium"] .legend-text::before {
+        content: 'SSP5-8.5 only';
+        font-size: 0.62rem;
+    }
+    .legend-row[data-cat="low"]    .legend-text { font-size: 0; }
+    .legend-row[data-cat="low"]    .legend-text::before {
+        content: 'Not inundated';
+        font-size: 0.62rem;
+    }
+
     /* Scale stays visible (always-relevant), coords hidden (no mousemove
-       on touch devices) — compact pill, capped width. */
+       on touch devices) — compact pill, intrinsic width so the full
+       "1 : 250,000" never gets clipped. */
     .status-bar-right {
+        flex: 0 0 auto;
         padding: 0.35rem 0.55rem;
         gap: 0;
-        max-width: 5rem;
+        max-width: none;
+        width: auto;
         box-sizing: border-box;
+        white-space: nowrap;
     }
     .status-coords { display: none; }
     .status-bar-right > .status-scale::before { content: none; }
     .status-scale {
         font-size: 0.62rem;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
+    .carto-scale-fraction { font-size: 0.62rem; }
+}
+
+/* Extra-narrow phones (≤360px): drop the legend title, drop the dot column,
+   and let everything shrink uniformly so the bar is always on-screen. */
+@media (max-width: 360px) {
+    .status-bar-left-col {
+        max-width: calc(100vw - 5.5rem);
+    }
+    .status-bar-legend .legend-title { display: none; }
+    .status-bar-legend { padding: 0.3rem 0.45rem 0.4rem; }
+    .status-bar-right  { padding: 0.3rem 0.45rem; }
 }
 
 /* Loading Indicator - Minimal */
