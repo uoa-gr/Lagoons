@@ -312,27 +312,22 @@ h6 { font-size: 0.75rem; }
     text-indent: 0;
     margin: 0;
     white-space: nowrap;
-    flex: 0 0 auto;
-    /* Editorial OpenType flourishes: discretionary ligatures, stylistic
-       alternates, contextual alternates, full kerning — Cormorant italic
-       has gorgeous swashes that ride on these features. */
+    /* Inline-flex with baseline alignment makes both spans sit on the
+       same baseline regardless of font size or font-specific metrics —
+       no vertical-align/transform hacks needed. */
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.18em;
     font-feature-settings: "dlig" 1, "salt" 1, "calt" 1, "kern" 1, "liga" 1;
 }
 .header h1 em {
-    /* Calligraphic 'of Earth' in Italianno — an inline-block lets us
-       use line-height + a top-pull to align the script's optical mid-line
-       with the Cormorant italic's x-height instead of its baseline. */
     font-family: 'Italianno', cursive;
     font-style: normal;
     font-weight: 400;
     color: var(--text-secondary);
-    margin-left: 0.18em;
-    font-size: 1.6em;
-    line-height: 0.55;        /* collapse Italianno's huge default leading */
+    font-size: 1.45em;
+    line-height: 0.6;
     letter-spacing: 0.01em;
-    display: inline-block;
-    vertical-align: -0.18em;  /* drop into the title's body line */
-    transform: translateY(0.1em);
 }
 
 .subtitle {
@@ -372,10 +367,8 @@ h6 { font-size: 0.75rem; }
         text-indent: 0;
     }
     .header h1 em {
-        font-size: 1.55em;
-        line-height: 0.55;
-        vertical-align: -0.16em;
-        transform: translateY(0.08em);
+        font-size: 1.45em;
+        line-height: 0.6;
     }
     .header-title { gap: 0.7rem; }
     .header-rule  { width: clamp(20px, 8vw, 50px); }
