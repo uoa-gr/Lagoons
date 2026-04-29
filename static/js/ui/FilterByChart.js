@@ -750,6 +750,10 @@ export default class FilterByChart {
         document.body.appendChild(pop);
         this._popover = pop;
         this._popoverTrigger = trigger;
+        // Snapshot the anchor rect ONCE when the popover opens. Content
+        // refreshes (e.g. removing a chip with ×) reuse this rect, so the
+        // popover doesn't drift as the "+N more" trigger shrinks or vanishes.
+        this._popoverAnchorRect = trigger.getBoundingClientRect();
         this._renderPopoverContent();
         this._positionPopover();
 
@@ -844,17 +848,16 @@ export default class FilterByChart {
         });
         foot.appendChild(clearAll);
         pop.appendChild(foot);
-
-        // Re-position once content is in place
-        this._positionPopover();
+        // Intentionally NO _positionPopover() here — see _openActivePopover.
+        // The popover stays anchored where it was first opened so removing
+        // chips with × doesn't make it jump as the trigger button shifts.
     }
 
     _positionPopover() {
         const pop = this._popover;
-        const trigger = this._popoverTrigger;
-        if (!pop || !trigger) return;
+        const tr  = this._popoverAnchorRect;
+        if (!pop || !tr) return;
 
-        const tr = trigger.getBoundingClientRect();
         const ph = pop.offsetHeight;
         const pw = pop.offsetWidth;
         const margin = 8;
@@ -877,6 +880,7 @@ export default class FilterByChart {
         if (this._popoverTeardown) { this._popoverTeardown(); this._popoverTeardown = null; }
         if (this._popover) { this._popover.remove(); this._popover = null; }
         this._popoverTrigger = null;
+        this._popoverAnchorRect = null;
     }
 
 }
