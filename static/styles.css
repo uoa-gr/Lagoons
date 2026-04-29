@@ -3797,7 +3797,10 @@ body.sidebar-open {
         margin-bottom: 0.5rem;
     }
 
-    /* Make map fill all available space */
+    /* Make map fill all available space.
+       Use dvh so the visible map (and the status bar pinned to its bottom)
+       never get pushed under the mobile URL bar / system UI. vh fallback
+       for older browsers. */
     .map-container {
         flex: 1;
         position: relative;
@@ -3808,6 +3811,7 @@ body.sidebar-open {
         border: none;
         border-radius: 0;
         height: calc(100vh - 120px);
+        height: calc(100dvh - 120px);
     }
 
     #map {
@@ -4123,6 +4127,7 @@ body.sidebar-open {
 
     .map-container {
         height: calc(100vh - 110px);
+        height: calc(100dvh - 110px);
         border: none;
     }
 
