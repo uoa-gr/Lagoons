@@ -8496,11 +8496,17 @@ body[data-active-tab="filters"] .sidebar-content {
 .wm-cred-univ a:hover { text-decoration-color: var(--primary-color); }
 .wm-cred-author { display: none; }
 
-/* ----- Signature: real handwritten image of the developer's signature ----- */
+/* ----- Signature: handwritten image + typeset name underneath -----
+   Wrapper is a column so the printed name sits as a caption below the
+   signature image. Both elements together carry the link. */
 .wm-signature {
-    display: inline-block;
-    line-height: 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 1;
     text-decoration: none;
+    color: inherit;
     transition: opacity var(--transition-fast);
 }
 .wm-signature img {
@@ -8512,8 +8518,21 @@ body[data-active-tab="filters"] .sidebar-content {
 }
 .wm-signature:hover { opacity: 0.7; }
 
+.wm-signature-name {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+    color: var(--text-secondary);
+    line-height: 1.2;
+    white-space: nowrap;
+    text-align: center;
+}
+
 /* Smaller variant for the welcome modal footer */
 .wm-signature-sm img { height: 44px; }
+.wm-signature-sm .wm-signature-name { font-size: 0.78rem; }
 
 .wm-sig-tag {
     margin: 0;
@@ -8551,8 +8570,10 @@ body[data-active-tab="filters"] .sidebar-content {
 .footer-signature {
     display: inline-flex;
     align-items: center;
-    line-height: 0;
+    gap: 0.5rem;
+    line-height: 1;
     text-decoration: none;
+    color: inherit;
     transition: opacity var(--transition-fast);
 }
 .footer-signature img {
@@ -8561,8 +8582,20 @@ body[data-active-tab="filters"] .sidebar-content {
     width: auto;
     max-width: 100%;
     object-fit: contain;
+    flex-shrink: 0;
 }
 .footer-signature:hover { opacity: 0.7; }
+
+.footer-signature-name {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+    color: var(--text-secondary);
+    line-height: 1;
+    white-space: nowrap;
+}
 .wm-cred-author a {
     color: inherit;
     text-decoration: underline;
@@ -8672,7 +8705,9 @@ html, body { overflow-x: hidden; }
     /* App footer — keep signature compact */
     .footer-content { gap: 0.5rem; padding: 0 0.85rem; }
     .footer-credit  { flex-wrap: wrap; justify-content: center; gap: 0.3rem; }
+    .footer-signature { gap: 0.4rem; }
     .footer-signature img { height: 20px; }
+    .footer-signature-name { font-size: 0.74rem; }
     .footer-link { font-size: 0.82rem; }
     .footer-dot { font-size: 0.72rem; }
     .footer-nav { gap: 0.35rem; }
