@@ -4,7 +4,7 @@
  */
 
 import LagoonPreviewMap from './LagoonPreviewMap.js';
-import { escapeHtml } from '../utils/helpers.js';
+import { buildLagoonHoverHTML, pinTooltipInsideMap } from './LagoonHoverCard.js';
 
 const POLYGON_ZOOM_THRESHOLD = 10;
 
@@ -110,20 +110,43 @@ class PolygonManager {
 
     _bindPolygonInteractions(feature, layer) {
         const p = feature.properties;
-        layer.bindTooltip(this.buildTooltipHTML(p), { className: 'custom-tooltip', sticky: true });
+
+        // Look up the full lagoon record so the polygon tooltip carries the
+        // same fields (name_gr, vec_slr, locality treatment, …) as marker
+        // tooltips. Fall back to the polygon-only properties when missing.
+        const lookup = () => this._lookupLagoon(p.id) || p;
+
+        layer.bindTooltip(() => buildLagoonHoverHTML(lookup()), {
+            className: 'custom-tooltip',
+            direction: 'top',
+            offset:    [0, -14],
+            sticky:    true
+        });
 
         layer.on('mouseover', () => layer.setStyle({ weight: 3, fillOpacity: 0.55 }));
         layer.on('mouseout',  () => this.polygonLayer?.resetStyle(layer));
 
         layer.on('tooltipopen', e => {
             const center = layer.getBounds()?.getCenter?.() || null;
-            const previewData = {
+            this.renderTooltipPreview(e.tooltip, {
                 id: p.id,
                 geojson: feature.geometry,
                 centroid_lat: center?.lat ?? null,
                 centroid_lng: center?.lng ?? null
-            };
-            this.renderTooltipPreview(e.tooltip, previewData);
+            });
+            requestAnimationFrame(() => pinTooltipInsideMap(e.tooltip, this.map));
+        });
+
+        // Sticky tooltips re-position on every mousemove → re-clamp each time.
+        let pinPending = false;
+        layer.on('mousemove', () => {
+            const tooltip = layer.getTooltip?.();
+            if (!tooltip || pinPending) return;
+            pinPending = true;
+            requestAnimationFrame(() => {
+                pinPending = false;
+                pinTooltipInsideMap(tooltip, this.map);
+            });
         });
 
         layer.on('tooltipclose', e => this.destroyTooltipPreview(e.tooltip));
@@ -139,26 +162,10 @@ class PolygonManager {
         });
     }
 
-    buildTooltipHTML(properties) {
-        const area  = properties.area_km2 != null ? `${parseFloat(properties.area_km2).toFixed(2)} km²` : '-';
-        const rcp26 = properties.rcp2_6_inundated ? properties.rcp2_6_inundated.toUpperCase() : '-';
-        const rcp85 = properties.rcp8_5_inundated ? properties.rcp8_5_inundated.toUpperCase() : '-';
-
-        return `
-            <div class="lagoon-hover-card">
-                <div class="lagoon-hover-preview">
-                    <div class="lagoon-preview-map" data-tooltip-preview-map></div>
-                </div>
-                <div class="lagoon-hover-body">
-                    <div class="lagoon-hover-name">${escapeHtml(properties.name_en || 'Unnamed')}</div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Location</span><span class="lagoon-hover-value">${escapeHtml(properties.location_en || '-')}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Island</span><span class="lagoon-hover-value">${escapeHtml(properties.island_en || '-')}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">Area</span><span class="lagoon-hover-value">${escapeHtml(area)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP1-2.6</span><span class="lagoon-hover-value">${escapeHtml(rcp26)}</span></div>
-                    <div class="lagoon-hover-row"><span class="lagoon-hover-label">SSP5-8.5</span><span class="lagoon-hover-value">${escapeHtml(rcp85)}</span></div>
-                </div>
-            </div>
-        `;
+    _lookupLagoon(id) {
+        const data = this.stateManager?.get?.('currentData');
+        if (!Array.isArray(data)) return null;
+        return data.find(r => r && r.id === id) || null;
     }
 
     renderTooltipPreview(tooltip, previewData) {
