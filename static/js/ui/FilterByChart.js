@@ -618,7 +618,50 @@ export default class FilterByChart {
                 onClear: () => this.numericRangeFilters.resetField?.(rangeKey)
             });
         }
+
+        // Advanced query (SQL builder) — surfaced as a single chip so the
+        // user can see when one is active, click to edit, or × to clear.
+        const sql = this.stateManager.get('activeSqlFilter');
+        const validSql = sql ? this._collectValidSqlConditions(sql) : [];
+        if (validSql.length > 0) {
+            items.push({
+                fieldKey: '__sql__',
+                label: 'Advanced query',
+                valueText: this._summarizeSqlConditions(validSql),
+                onClear: () => this.eventBus.emit('sqlFilter:clear'),
+                onClick: () => this.eventBus.emit('ui:sqlFilterClicked')
+            });
+        }
+
         return items;
+    }
+
+    _collectValidSqlConditions(conditions) {
+        const out = [];
+        for (const item of conditions) {
+            if (item.isGroup && item.conditions) {
+                out.push(...this._collectValidSqlConditions(item.conditions));
+            } else if (['is_null', 'is_not_null'].includes(item.operator) ||
+                       (item.value !== undefined && item.value !== '')) {
+                out.push(item);
+            }
+        }
+        return out;
+    }
+
+    _summarizeSqlConditions(conds) {
+        const OPS = { eq: '=', neq: '≠', gt: '>', gte: '≥', lt: '<', lte: '≤',
+                      is_null: 'is empty', is_not_null: 'is not empty' };
+        const parts = conds.map(c => {
+            const f = FIELD_BY_KEY.get(c.field);
+            const name = f?.label || c.field;
+            const op = OPS[c.operator] || c.operator;
+            if (c.operator === 'is_null' || c.operator === 'is_not_null') return `${name} ${op}`;
+            return `${name} ${op} ${c.value}`;
+        });
+        const first = parts[0] || '';
+        const rest = parts.length - 1;
+        return rest > 0 ? `${first} · +${rest} more` : first;
     }
 
     renderActiveList() {
@@ -668,10 +711,13 @@ export default class FilterByChart {
             item.onClear();
         });
 
-        // Click body of chip → switch picker to that variable
-        const text2 = text;
-        text2.addEventListener('click', () => this.selectField(item.fieldKey));
-        text2.style.cursor = 'pointer';
+        // Click body of chip → switch picker to that variable, or invoke the
+        // chip's own click handler if it provides one (e.g. SQL chip → modal).
+        text.addEventListener('click', () => {
+            if (typeof item.onClick === 'function') item.onClick();
+            else this.selectField(item.fieldKey);
+        });
+        text.style.cursor = 'pointer';
 
         chip.append(text, x);
         return chip;
