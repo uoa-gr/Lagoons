@@ -2561,108 +2561,226 @@ body.sidebar-collapsed .rail-btn:hover {
     min-width: 150px;
 }
 
-/* Query Builder Dropdowns — editorial: borderless w/ confident underline.
-   Field & value (variable names) keep the italic serif voice from the
-   sidebar picker; logic and operator use sans for crisp form-control feel. */
-.query-condition-row select,
-.query-group select,
-.condition-logic select,
-.condition-field select,
-.condition-operator select,
-.condition-value select {
-    display: block !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    height: 38px !important;
-    max-height: 38px !important;
-    min-height: 38px !important;
-    line-height: 36px !important;
-    padding: 0 1.65rem 0 0.05rem !important;
-    margin: 0 !important;
-    border: none !important;
-    border-bottom: 1px solid var(--text-primary) !important;
-    border-radius: 0 !important;
-    background-color: transparent !important;
-    color: var(--text-primary) !important;
-    font-family: var(--font-sans) !important;
-    font-style: normal !important;
-    font-size: 0.88rem !important;
-    font-weight: 400 !important;
-    cursor: pointer !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.15rem center !important;
-    background-size: 14px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    transition: border-color var(--transition-fast), background-color var(--transition-fast) !important;
+/* ── Editorial select trigger (replaces native <select>) ──────────────── */
+.eds-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    width: 100%;
+    height: 38px;
+    padding: 0 0.15rem;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid var(--text-primary);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* Variable & value dropdowns keep the editorial serif italic voice */
-.condition-field select,
-.condition-value select {
-    font-family: var(--font-serif) !important;
-    font-style: italic !important;
-    font-size: 1rem !important;
+.eds-btn .eds-value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.query-condition-row select:hover,
-.query-group select:hover {
-    background-color: rgba(0, 0, 0, 0.025) !important;
+.eds-btn .eds-chev {
+    flex-shrink: 0;
+    color: var(--text-primary);
+    transition: transform var(--transition-fast);
 }
 
-.query-condition-row select:focus,
-.query-group select:focus,
-.condition-logic select:focus,
-.condition-field select:focus,
-.condition-operator select:focus,
-.condition-value select:focus {
-    outline: none !important;
-    background-color: rgba(0, 0, 0, 0.04) !important;
-    box-shadow: inset 0 -2px 0 0 var(--primary-color) !important;
-    border-bottom-color: var(--primary-color) !important;
+.eds-btn:hover {
+    background-color: rgba(0, 0, 0, 0.025);
 }
 
-/* Optgroup labels in the native popup */
-.query-condition-row select optgroup,
-.query-group select optgroup {
-    font-family: var(--font-sans) !important;
-    font-style: normal !important;
-    font-weight: 600 !important;
-    font-size: 0.72rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.06em !important;
-    color: var(--text-muted) !important;
+.eds-btn:focus-visible,
+.eds-btn.is-open {
+    outline: none;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-bottom-color: var(--primary-color);
+    box-shadow: inset 0 -2px 0 0 var(--primary-color);
 }
 
-.query-condition-row select option,
-.query-group select option {
-    font-family: var(--font-sans) !important;
-    font-style: normal !important;
-    font-size: 0.85rem !important;
-    color: var(--text-primary) !important;
+.eds-btn.is-open .eds-chev { transform: rotate(180deg); }
+
+.eds-btn .eds-value.is-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
 }
 
-.condition-logic select {
-    font-family: var(--font-sans) !important;
-    font-style: normal !important;
-    font-weight: 600 !important;
-    color: var(--text-secondary) !important;
-    text-transform: uppercase !important;
-    font-size: 0.68rem !important;
-    letter-spacing: 0.08em !important;
-    text-align: left !important;
-    text-align-last: left !important;
-    border-bottom-color: var(--border-light) !important;
+/* Field & value variants keep the editorial serif italic voice */
+.eds-btn--field .eds-value,
+.eds-btn--value .eds-value {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1rem;
 }
 
-.condition-operator select {
-    color: var(--text-secondary) !important;
-    font-size: 0.85rem !important;
+.eds-btn--logic {
+    border-bottom-color: var(--border-light);
+}
+.eds-btn--logic .eds-value {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+}
+
+.eds-btn--operator .eds-value {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Numeric / free-text value input matches the editorial select look */
+.eds-input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 38px;
+    padding: 0 0.15rem;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid var(--text-primary);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1rem;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: none;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.eds-input::-webkit-outer-spin-button,
+.eds-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.eds-input:hover { background-color: rgba(0, 0, 0, 0.025); }
+
+.eds-input:focus {
+    outline: none;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-bottom-color: var(--primary-color);
+    box-shadow: inset 0 -2px 0 0 var(--primary-color);
+}
+
+.eds-input::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 1;
+}
+
+/* ── Editorial popover (custom dropdown panel) ────────────────────────── */
+.eds-popover {
+    position: fixed;
+    z-index: 11000;
+    min-width: 200px;
+    max-width: 360px;
+    max-height: 320px;
+    display: flex;
+    flex-direction: column;
+    background: var(--background-primary);
+    border: 1px solid var(--text-primary);
+    box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.22),
+                0 4px 8px -4px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    animation: edsPopIn 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes edsPopIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.eds-search-wrap {
+    padding: 0.55rem 0.85rem 0.45rem;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.eds-search {
+    width: 100%;
+    padding: 0.25rem 0;
+    border: none;
+    border-bottom: 1px solid var(--border-light);
+    background: transparent;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+.eds-search:focus { border-bottom-color: var(--primary-color); }
+.eds-search::placeholder { color: var(--text-muted); }
+
+.eds-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.35rem 0;
+}
+
+.eds-group {
+    padding: 0.6rem 0.95rem 0.25rem;
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.eds-option {
+    display: block;
+    width: 100%;
+    padding: 0.45rem 0.95rem;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.eds-popover--operator .eds-option,
+.eds-popover--logic .eds-option {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+}
+
+.eds-option:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.eds-option.is-active {
+    background: var(--primary-color);
+    color: var(--text-inverse);
+    font-weight: 500;
+}
+
+.eds-empty {
+    padding: 0.85rem 0.95rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
 }
 
 .condition-where {
