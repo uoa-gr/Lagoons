@@ -2561,7 +2561,9 @@ body.sidebar-collapsed .rail-btn:hover {
     min-width: 150px;
 }
 
-/* Query Builder Dropdowns — editorial: borderless w/ hairline underline */
+/* Query Builder Dropdowns — editorial: borderless w/ confident underline.
+   Field & value (variable names) keep the italic serif voice from the
+   sidebar picker; logic and operator use sans for crisp form-control feel. */
 .query-condition-row select,
 .query-group select,
 .condition-logic select,
@@ -2571,37 +2573,46 @@ body.sidebar-collapsed .rail-btn:hover {
     display: block !important;
     box-sizing: border-box !important;
     width: 100% !important;
-    height: 32px !important;
-    max-height: 32px !important;
-    min-height: 32px !important;
-    line-height: 30px !important;
-    padding: 0 1.4rem 0 0 !important;
+    height: 38px !important;
+    max-height: 38px !important;
+    min-height: 38px !important;
+    line-height: 36px !important;
+    padding: 0 1.65rem 0 0.05rem !important;
     margin: 0 !important;
     border: none !important;
-    border-bottom: 1px solid var(--border-light) !important;
+    border-bottom: 1px solid var(--text-primary) !important;
     border-radius: 0 !important;
     background-color: transparent !important;
     color: var(--text-primary) !important;
-    font-family: var(--font-serif) !important;
-    font-style: italic !important;
-    font-size: 0.95rem !important;
+    font-family: var(--font-sans) !important;
+    font-style: normal !important;
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
     cursor: pointer !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 0.1rem center !important;
-    background-size: 12px !important;
+    background-position: right 0.15rem center !important;
+    background-size: 14px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-    transition: border-color var(--transition-fast), color var(--transition-fast) !important;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast) !important;
+}
+
+/* Variable & value dropdowns keep the editorial serif italic voice */
+.condition-field select,
+.condition-value select {
+    font-family: var(--font-serif) !important;
+    font-style: italic !important;
+    font-size: 1rem !important;
 }
 
 .query-condition-row select:hover,
 .query-group select:hover {
-    border-bottom-color: var(--text-primary) !important;
+    background-color: rgba(0, 0, 0, 0.025) !important;
 }
 
 .query-condition-row select:focus,
@@ -2611,8 +2622,29 @@ body.sidebar-collapsed .rail-btn:hover {
 .condition-operator select:focus,
 .condition-value select:focus {
     outline: none !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    box-shadow: inset 0 -2px 0 0 var(--primary-color) !important;
     border-bottom-color: var(--primary-color) !important;
-    box-shadow: none !important;
+}
+
+/* Optgroup labels in the native popup */
+.query-condition-row select optgroup,
+.query-group select optgroup {
+    font-family: var(--font-sans) !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--text-muted) !important;
+}
+
+.query-condition-row select option,
+.query-group select option {
+    font-family: var(--font-sans) !important;
+    font-style: normal !important;
+    font-size: 0.85rem !important;
+    color: var(--text-primary) !important;
 }
 
 .condition-logic select {
@@ -2621,10 +2653,16 @@ body.sidebar-collapsed .rail-btn:hover {
     font-weight: 600 !important;
     color: var(--text-secondary) !important;
     text-transform: uppercase !important;
-    font-size: 0.7rem !important;
-    letter-spacing: 0.06em !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
     text-align: left !important;
     text-align-last: left !important;
+    border-bottom-color: var(--border-light) !important;
+}
+
+.condition-operator select {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
 }
 
 .condition-where {
@@ -2632,16 +2670,16 @@ body.sidebar-collapsed .rail-btn:hover {
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    height: 32px;
+    height: 38px;
     font-family: var(--font-sans);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     background: transparent;
     border: none;
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid var(--border-light);
 }
 
 /* Remove Button — editorial × */
