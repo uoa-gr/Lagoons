@@ -18,6 +18,7 @@ class MapManager {
         this.map = L.map(containerId, {
             center: [39.0742, 21.8243],
             zoom: 7,
+            maxZoom: 19,
             zoomControl: true,
             attributionControl: true,
             // Allow quarter-zoom steps so the scale fraction updates smoothly
