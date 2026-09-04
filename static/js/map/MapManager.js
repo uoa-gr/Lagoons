@@ -43,11 +43,11 @@ class MapManager {
             'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }),
             'Topographic':   L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',  { attribution: '© OpenTopoMap contributors', maxZoom: 17 }),
             'ESRI Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri', maxZoom: 19 }),
-            'CartoDB Positron': L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 }),
+            'OpenFreeMap Positron': L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/positron', attribution: 'OpenFreeMap © OpenMapTiles Data from OpenStreetMap' }),
             'CartoDB Dark':     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  { attribution: '© CartoDB', maxZoom: 19 })
         };
-        this.basemaps['CartoDB Positron'].addTo(this.map);
-        this.currentBasemap = 'CartoDB Positron';
+        this.basemaps['OpenFreeMap Positron'].addTo(this.map);
+        this.currentBasemap = 'OpenFreeMap Positron';
     }
 
     _initControls() {
